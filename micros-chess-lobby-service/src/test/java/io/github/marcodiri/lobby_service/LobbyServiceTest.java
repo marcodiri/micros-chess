@@ -2,6 +2,7 @@ package io.github.marcodiri.lobby_service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +17,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.github.marcodiri.lobby_service.domain.GameProposal;
+import io.github.marcodiri.lobby_service.domain.command.AcceptGameProposalCommand;
+import io.github.marcodiri.lobby_service.domain.command.CancelGameProposalCommand;
 import io.github.marcodiri.lobby_service.domain.command.CreateGameProposalCommand;
 import io.github.marcodiri.lobby_service.repository.event_store.GameProposalESRepository;
 
@@ -33,15 +36,15 @@ class LobbyServiceTest {
 
         @Test
         void createGameProposalCallsRepositorySaveWithCommand() {
-            UUID playerId = UUID.randomUUID();
+            UUID creatorId = UUID.randomUUID();
 
-            lobbyService.createGameProposal(playerId);
+            lobbyService.createGameProposal(creatorId);
 
             ArgumentCaptor<CreateGameProposalCommand> commandCaptor = ArgumentCaptor
                     .forClass(CreateGameProposalCommand.class);
             verify(gameProposalESRepository).save(commandCaptor.capture());
 
-            assertThat(commandCaptor.getValue().getPlayerId()).isEqualTo(playerId);
+            assertThat(commandCaptor.getValue().getCreatorId()).isEqualTo(creatorId);
         }
 
         @Test
@@ -50,6 +53,72 @@ class LobbyServiceTest {
             when(gameProposalESRepository.save(any())).thenReturn(gameProposal);
 
             GameProposal returnedGameProposal = lobbyService.createGameProposal(UUID.randomUUID());
+
+            assertThat(returnedGameProposal).isEqualTo(gameProposal);
+        }
+
+    }
+
+    @Nested
+    class CancelGameProposal {
+
+        @Test
+        void cancelGameProposalCallsRepositoryUpdateWithCommand() {
+            UUID creatorId = UUID.randomUUID();
+            UUID gameProposalId = UUID.randomUUID();
+
+            lobbyService.cancelGameProposal(gameProposalId, creatorId);
+
+            ArgumentCaptor<UUID> gameProposalIdCaptor = ArgumentCaptor
+                    .forClass(UUID.class);
+            ArgumentCaptor<CancelGameProposalCommand> commandCaptor = ArgumentCaptor
+                    .forClass(CancelGameProposalCommand.class);
+            verify(gameProposalESRepository).update(gameProposalIdCaptor.capture(), commandCaptor.capture());
+
+            assertThat(gameProposalIdCaptor.getValue()).isEqualTo(gameProposalId);
+            assertThat(commandCaptor.getValue().getCreatorId()).isEqualTo(creatorId);
+        }
+
+        @Test
+        void cancelGameProposalReturnsAggregate() {
+            GameProposal gameProposal = new GameProposal();
+            when(gameProposalESRepository.update(isA(UUID.class), isA(CancelGameProposalCommand.class)))
+                    .thenReturn(gameProposal);
+
+            GameProposal returnedGameProposal = lobbyService.cancelGameProposal(UUID.randomUUID(), UUID.randomUUID());
+
+            assertThat(returnedGameProposal).isEqualTo(gameProposal);
+        }
+
+    }
+
+    @Nested
+    class AcceptGameProposal {
+
+        @Test
+        void acceptGameProposalCallsRepositoryUpdateWithCommand() {
+            UUID acceptorId = UUID.randomUUID();
+            UUID gameProposalId = UUID.randomUUID();
+
+            lobbyService.acceptGameProposal(gameProposalId, acceptorId);
+
+            ArgumentCaptor<UUID> gameProposalIdCaptor = ArgumentCaptor
+                    .forClass(UUID.class);
+            ArgumentCaptor<AcceptGameProposalCommand> commandCaptor = ArgumentCaptor
+                    .forClass(AcceptGameProposalCommand.class);
+            verify(gameProposalESRepository).update(gameProposalIdCaptor.capture(), commandCaptor.capture());
+
+            assertThat(gameProposalIdCaptor.getValue()).isEqualTo(gameProposalId);
+            assertThat(commandCaptor.getValue().getAcceptorId()).isEqualTo(acceptorId);
+        }
+
+        @Test
+        void acceptGameProposalReturnsAggregate() {
+            GameProposal gameProposal = new GameProposal();
+            when(gameProposalESRepository.update(isA(UUID.class), isA(AcceptGameProposalCommand.class)))
+                    .thenReturn(gameProposal);
+
+            GameProposal returnedGameProposal = lobbyService.acceptGameProposal(UUID.randomUUID(), UUID.randomUUID());
 
             assertThat(returnedGameProposal).isEqualTo(gameProposal);
         }
