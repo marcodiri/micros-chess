@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  lobby-service:
+    build:
+      context: ./micros-chess-lobby-service
+      dockerfile: Dockerfile  # FIXME: use wildfly image for production??
+    volumes:
+      - .:/workspaces:cached
+
+    # Runs on the same network as the database container
+    network_mode: service:eventstore.db
+
+  eventstore.db:
+    image: eventstore/eventstore:21.10.0-buster-slim
+    environment:
+      - EVENTSTORE_CLUSTER_SIZE=1
+      - EVENTSTORE_RUN_PROJECTIONS=All
+      - EVENTSTORE_START_STANDARD_PROJECTIONS=true
+      - EVENTSTORE_EXT_TCP_PORT=1113
+      - EVENTSTORE_HTTP_PORT=2113
+      - EVENTSTORE_INSECURE=true
+      - EVENTSTORE_ENABLE_EXTERNAL_TCP=true
+      - EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP=true
+    ports:
+      - "1113:1113"
+      - "2113:2113"
+#     volumes:
+#       - type: volume
+#         source: eventstore-volume-data
+#         target: /var/lib/eventstore
+#       - type: volume
+#         source: eventstore-volume-logs
+#         target: /var/log/eventstore
+
+# volumes:
+#   eventstore-volume-data:
+#   eventstore-volume-logs:
