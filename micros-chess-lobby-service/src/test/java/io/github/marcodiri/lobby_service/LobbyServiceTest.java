@@ -6,7 +6,9 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -16,11 +18,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import io.github.marcodiri.lobby_service.domain.GameProposal;
-import io.github.marcodiri.lobby_service.domain.command.AcceptGameProposalCommand;
-import io.github.marcodiri.lobby_service.domain.command.CancelGameProposalCommand;
-import io.github.marcodiri.lobby_service.domain.command.CreateGameProposalCommand;
-import io.github.marcodiri.lobby_service.repository.event_store.GameProposalESRepository;
+import io.github.marcodiri.lobbyservice.LobbyService;
+import io.github.marcodiri.lobbyservice.domain.GameProposal;
+import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
+import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
+import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;
+import io.github.marcodiri.lobbyservice.repository.event_store.GameProposalESRepository;
 
 @ExtendWith(MockitoExtension.class)
 class LobbyServiceTest {
@@ -35,7 +38,9 @@ class LobbyServiceTest {
     class CreateGameProposal {
 
         @Test
-        void createGameProposalCallsRepositorySaveWithCommand() {
+        void createGameProposalCallsRepositorySaveWithCommand() throws IllegalAccessException, IllegalArgumentException,
+                InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
+                ExecutionException {
             UUID creatorId = UUID.randomUUID();
 
             lobbyService.createGameProposal(creatorId);
@@ -48,7 +53,9 @@ class LobbyServiceTest {
         }
 
         @Test
-        void createGameProposalReturnsAggregate() {
+        void createGameProposalReturnsAggregate() throws IllegalAccessException, IllegalArgumentException,
+                InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
+                ExecutionException {
             GameProposal gameProposal = new GameProposal();
             when(gameProposalESRepository.save(any())).thenReturn(gameProposal);
 

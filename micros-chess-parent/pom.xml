@@ -12,6 +12,12 @@
 
   <name>micros-chess-parent</name>
 
+  <modules>
+    <module>../micros-chess-core</module>
+    <module>../micros-chess-lobby-service-api</module>
+    <module>../micros-chess-lobby-service</module>
+  </modules>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>17</maven.compiler.source>
@@ -24,6 +30,7 @@
     <assertj.version>3.24.2</assertj.version>
     <mockito.version>5.4.0</mockito.version>
     <rest-assured.version>5.3.1</rest-assured.version>
+    <jackson-dataformat.version>2.15.2</jackson-dataformat.version>
     <log4j.version>3.0.0-alpha1</log4j.version>
     <awaitility.version>4.2.0</awaitility.version>
     <docker-maven.plugin.version>0.40.2</docker-maven.plugin.version>
@@ -48,6 +55,11 @@
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
         <version>${commons-lang3.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-xml</artifactId>
+        <version>${jackson-dataformat.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.logging.log4j</groupId>

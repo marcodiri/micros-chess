@@ -1,27 +1,31 @@
-package io.github.marcodiri.lobby_service;
+package io.github.marcodiri.lobbyservice;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import io.github.marcodiri.lobby_service.domain.GameProposal;
-import io.github.marcodiri.lobby_service.domain.command.AcceptGameProposalCommand;
-import io.github.marcodiri.lobby_service.domain.command.CancelGameProposalCommand;
-import io.github.marcodiri.lobby_service.domain.command.CreateGameProposalCommand;
-import io.github.marcodiri.lobby_service.repository.event_store.GameProposalESRepository;
+import io.github.marcodiri.lobbyservice.domain.GameProposal;
+import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
+import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
+import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;
+import io.github.marcodiri.lobbyservice.repository.event_store.GameProposalESRepository;
 
 public class LobbyService {
 
     private GameProposalESRepository gameProposalESRepository;
 
-	private static final Logger LOGGER = LogManager.getLogger(LobbyService.class);
+    private static final Logger LOGGER = LogManager.getLogger(LobbyService.class);
 
     public LobbyService(GameProposalESRepository gameProposalESRepository) {
         this.gameProposalESRepository = gameProposalESRepository;
     }
 
-    public GameProposal createGameProposal(UUID creatorId) {
+    public GameProposal createGameProposal(UUID creatorId) throws IllegalAccessException, IllegalArgumentException,
+            InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
+            ExecutionException {
         GameProposal gameProposal = gameProposalESRepository.save(new CreateGameProposalCommand(creatorId));
         LOGGER.info("Created: {}", gameProposal);
         return gameProposal;

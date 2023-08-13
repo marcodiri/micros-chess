@@ -1,4 +1,4 @@
-package io.github.marcodiri.lobby_service.domain.command;
+package io.github.marcodiri.lobbyservice.domain.command;
 
 import java.util.UUID;
 
