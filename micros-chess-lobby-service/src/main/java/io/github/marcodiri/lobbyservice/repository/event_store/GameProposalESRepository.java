@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.eventstore.dbclient.EventData;
 import com.eventstore.dbclient.EventStoreDBClient;
 import com.eventstore.dbclient.WriteResult;
@@ -22,6 +25,8 @@ public class GameProposalESRepository {
     private EventStoreDBClient client;
     private GameProposalFactory gameProposalFactory;
 
+    private static final Logger LOGGER = LogManager.getLogger(GameProposalESRepository.class);
+
     public GameProposalESRepository(EventStoreDBClient client, GameProposalFactory gameProposalFactory) {
         this.client = client;
         this.gameProposalFactory = gameProposalFactory;
@@ -32,6 +37,7 @@ public class GameProposalESRepository {
             ExecutionException {
         GameProposal gameProposal = gameProposalFactory.createGameProposal();
         List<DomainEvent> events = gameProposal.process(cmd);
+
         List<EventData> eventDataList = new ArrayList<>();
         for (DomainEvent event : events) {
             gameProposal.getClass().getMethod("apply", event.getClass()).invoke(gameProposal, event);
@@ -44,7 +50,10 @@ public class GameProposalESRepository {
         WriteResult writeResult = client
                 .appendToStream(streamNameFromGameProposal(gameProposal), eventDataList.iterator())
                 .get();
-        // LOGGER.info(writeResult);
+
+        LOGGER.info("Saved events to EventStore:");
+        eventDataList.forEach(e -> LOGGER.info(e.getEventType()));
+        LOGGER.debug(writeResult);
 
         return gameProposal;
     }
