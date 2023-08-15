@@ -1,4 +1,4 @@
-package io.github.marcodiri.lobbyservice.repository.event_store;
+package io.github.marcodiri.lobbyservice.repository.eventstore;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;

@@ -23,7 +23,7 @@ import io.github.marcodiri.lobbyservice.domain.GameProposal;
 import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;
-import io.github.marcodiri.lobbyservice.repository.event_store.GameProposalESRepository;
+import io.github.marcodiri.lobbyservice.repository.eventstore.GameProposalESRepository;
 
 @ExtendWith(MockitoExtension.class)
 class LobbyServiceTest {
