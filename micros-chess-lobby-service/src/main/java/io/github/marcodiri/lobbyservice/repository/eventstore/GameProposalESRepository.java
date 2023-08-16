@@ -47,11 +47,7 @@ public class GameProposalESRepository {
         GameProposal gameProposal = gameProposalFactory.createGameProposal();
 
         List<DomainEvent> events = gameProposal.process(cmd);
-        List<EventData> appliedEventsData = applyEventsToGameProposal(gameProposal, events);
-        WriteResult writeResult = writeEventsForGameProposal(gameProposal, appliedEventsData);
-
-        LOGGER.info("Saved events to EventStore: {}", events);
-        LOGGER.debug(writeResult);
+        applyAndWriteEvents(gameProposal, events);
 
         return gameProposal;
     }
@@ -65,10 +61,7 @@ public class GameProposalESRepository {
         LOGGER.info("Restored GameProposal from events: {}, \n{}", pastEvents, gameProposal);
 
         List<DomainEvent> events = gameProposal.process(cmd);
-        List<EventData> appliedEventsData = applyEventsToGameProposal(gameProposal, events);
-        WriteResult writeResult = writeEventsForGameProposal(gameProposal, appliedEventsData);
-        LOGGER.info("Saved events to EventStore: {}", events);
-        LOGGER.debug(writeResult);
+        applyAndWriteEvents(gameProposal, events);
 
         return gameProposal;
     }
@@ -113,7 +106,9 @@ public class GameProposalESRepository {
     }
 
     /**
-     * Applies events to a GameProposal and returns applied events ready for EventStoreDB.
+     * Applies events to a GameProposal and returns applied events ready for
+     * EventStoreDB.
+     *
      * @param gameProposal the GameProposal to apply events to.
      * @param events       the events to be applied.
      * @return a list of applied events ready to be sent to EventStoreDB.
@@ -134,6 +129,26 @@ public class GameProposalESRepository {
             eventDataList.add(eventData);
         }
         return eventDataList;
+    }
+
+    /**
+     * Applies events to a GameProposal and writes events to EventStoreDB.
+     *
+     * @param gameProposal the GameProposal to apply events to.
+     * @param events       the events to be applied.
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     * @throws InterruptedException
+     * @throws ExecutionException
+     * @see GameProposal
+     */
+    private void applyAndWriteEvents(GameProposal gameProposal, List<DomainEvent> events) throws IllegalAccessException,
+            InvocationTargetException, NoSuchMethodException, InterruptedException, ExecutionException {
+        List<EventData> appliedEventsData = applyEventsToGameProposal(gameProposal, events);
+        WriteResult writeResult = writeEventsForGameProposal(gameProposal, appliedEventsData);
+        LOGGER.info("Saved events to EventStore: {}", events);
+        LOGGER.debug(writeResult);
     }
 
 }
