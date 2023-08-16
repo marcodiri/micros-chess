@@ -1,4 +1,4 @@
-package io.github.marcodiri.lobby_service;
+package io.github.marcodiri.lobbyservice;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,7 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import io.github.marcodiri.lobbyservice.LobbyService;
 import io.github.marcodiri.lobbyservice.domain.GameProposal;
 import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
