@@ -39,12 +39,12 @@ import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.marcodiri.core.domain.event.DomainEvent;
+import io.github.marcodiri.lobbyservice.api.event.GameProposalCanceled;
+import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
 import io.github.marcodiri.lobbyservice.domain.GameProposal;
 import io.github.marcodiri.lobbyservice.domain.GameProposalFactory;
 import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;
-import io.github.marcodiri.lobbyservice.domain.event.GameProposalCanceled;
-import io.github.marcodiri.lobbyservice.domain.event.GameProposalCreated;
 
 @ExtendWith(MockitoExtension.class)
 public class GameProposalESRepositoryIT {

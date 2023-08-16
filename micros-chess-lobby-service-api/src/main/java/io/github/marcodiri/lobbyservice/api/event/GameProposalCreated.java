@@ -1,11 +1,9 @@
-package io.github.marcodiri.lobbyservice.domain.event;
+package io.github.marcodiri.lobbyservice.api.event;
 
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import io.github.marcodiri.lobbyservice.api.event.GameProposalEventType;
 
 public final class GameProposalCreated extends GameProposalEvent {
 

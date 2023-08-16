@@ -33,5 +33,9 @@
       <groupId>io.github.marcodiri</groupId>
       <artifactId>micros-chess-core</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-xml</artifactId>
+    </dependency>
   </dependencies>
 </project>
