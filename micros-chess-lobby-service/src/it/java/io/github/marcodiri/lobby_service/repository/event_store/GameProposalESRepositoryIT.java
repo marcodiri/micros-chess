@@ -93,7 +93,8 @@ public class GameProposalESRepositoryIT {
                 InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
                 ExecutionException {
             GameProposal gameProposal = mock(GameProposal.class);
-            List<DomainEvent> event = Collections.singletonList(new GameProposalCreated(UUID.randomUUID()));
+            List<DomainEvent> event = Collections
+                    .singletonList(new GameProposalCreated(UUID.randomUUID(), UUID.randomUUID()));
 
             when(gameProposal.process(isA(CreateGameProposalCommand.class))).thenReturn(event);
             when(gameProposalFactory.createGameProposal()).thenReturn(gameProposal);
@@ -112,7 +113,7 @@ public class GameProposalESRepositoryIT {
                 InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
                 ExecutionException {
             GameProposal gameProposal = mock(GameProposal.class);
-            List<DomainEvent> events = Arrays.asList(new GameProposalCreated(UUID.randomUUID()),
+            List<DomainEvent> events = Arrays.asList(new GameProposalCreated(UUID.randomUUID(), UUID.randomUUID()),
                     new GameProposalCanceled(UUID.randomUUID()));
 
             when(gameProposal.process(isA(CreateGameProposalCommand.class))).thenReturn(events);
@@ -135,7 +136,7 @@ public class GameProposalESRepositoryIT {
             GameProposal gameProposal = mock(GameProposal.class);
             UUID gameProposalId = UUID.randomUUID();
             when(gameProposal.getId()).thenReturn(gameProposalId);
-            List<DomainEvent> events = Arrays.asList(new GameProposalCreated(gameProposalId),
+            List<DomainEvent> events = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
                     new GameProposalCanceled(gameProposalId));
 
             when(gameProposal.process(isA(CreateGameProposalCommand.class))).thenReturn(events);
