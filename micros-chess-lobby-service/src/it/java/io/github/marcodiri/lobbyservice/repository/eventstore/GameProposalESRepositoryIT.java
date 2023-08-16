@@ -1,4 +1,4 @@
-package io.github.marcodiri.lobby_service.repository.event_store;
+package io.github.marcodiri.lobbyservice.repository.eventstore;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.isA;
@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -25,12 +26,14 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.eventstore.dbclient.EventData;
 import com.eventstore.dbclient.EventStoreDBClient;
 import com.eventstore.dbclient.EventStoreDBClientSettings;
 import com.eventstore.dbclient.EventStoreDBConnectionString;
 import com.eventstore.dbclient.ReadResult;
 import com.eventstore.dbclient.ReadStreamOptions;
 import com.eventstore.dbclient.ResolvedEvent;
+import com.eventstore.dbclient.WriteResult;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,10 +41,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.marcodiri.core.domain.event.DomainEvent;
 import io.github.marcodiri.lobbyservice.domain.GameProposal;
 import io.github.marcodiri.lobbyservice.domain.GameProposalFactory;
+import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.event.GameProposalCanceled;
 import io.github.marcodiri.lobbyservice.domain.event.GameProposalCreated;
-import io.github.marcodiri.lobbyservice.repository.eventstore.GameProposalESRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class GameProposalESRepositoryIT {

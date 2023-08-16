@@ -1,5 +1,6 @@
 package io.github.marcodiri.lobbyservice.repository.eventstore;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,13 @@ import org.apache.logging.log4j.Logger;
 
 import com.eventstore.dbclient.EventData;
 import com.eventstore.dbclient.EventStoreDBClient;
+import com.eventstore.dbclient.ReadResult;
+import com.eventstore.dbclient.ReadStreamOptions;
+import com.eventstore.dbclient.ResolvedEvent;
 import com.eventstore.dbclient.WriteResult;
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.databind.DatabindException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.marcodiri.core.domain.event.DomainEvent;
 import io.github.marcodiri.lobbyservice.domain.GameProposal;
@@ -39,13 +46,12 @@ public class GameProposalESRepository {
         List<DomainEvent> events = gameProposal.process(cmd);
 
         List<EventData> eventDataList = new ArrayList<>();
-        for (DomainEvent event : events) {
-            gameProposal.getClass().getMethod("apply", event.getClass()).invoke(gameProposal, event);
+        events.forEach(event -> {
             EventData eventData = EventData
                     .builderAsJson(event.getType().toString(), event)
                     .build();
             eventDataList.add(eventData);
-        }
+        });
 
         WriteResult writeResult = client
                 .appendToStream(streamNameFromGameProposal(gameProposal), eventDataList.iterator())
