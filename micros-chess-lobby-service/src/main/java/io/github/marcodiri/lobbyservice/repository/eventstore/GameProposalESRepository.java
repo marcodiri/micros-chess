@@ -14,6 +14,7 @@ import com.eventstore.dbclient.EventData;
 import com.eventstore.dbclient.EventStoreDBClient;
 import com.eventstore.dbclient.ReadResult;
 import com.eventstore.dbclient.ReadStreamOptions;
+import com.eventstore.dbclient.RecordedEvent;
 import com.eventstore.dbclient.ResolvedEvent;
 import com.eventstore.dbclient.WriteResult;
 import com.fasterxml.jackson.core.exc.StreamReadException;
@@ -21,6 +22,7 @@ import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.marcodiri.core.domain.event.DomainEvent;
+import io.github.marcodiri.lobbyservice.api.event.GameProposalEventType;
 import io.github.marcodiri.lobbyservice.domain.GameProposal;
 import io.github.marcodiri.lobbyservice.domain.GameProposalFactory;
 import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
@@ -75,6 +77,29 @@ public class GameProposalESRepository {
     private String streamNameFromGameProposal(GameProposal gameProposal) {
         UUID gameProposalId = gameProposal.getId();
         return String.format("GameProposal_%s", gameProposalId);
+    }
+
+    List<DomainEvent> readEventsFor(GameProposal gameProposal)
+            throws InterruptedException, ExecutionException, StreamReadException, DatabindException, IOException {
+        ReadStreamOptions readLastEvent = ReadStreamOptions.get()
+                .forwards()
+                .fromStart();
+
+        ReadResult result = client.readStream(streamNameFromGameProposal(gameProposal), readLastEvent)
+                .get();
+
+        List<ResolvedEvent> resolvedEvents = result.getEvents();
+
+        List<DomainEvent> pastEvents = new ArrayList<>();
+        for (ResolvedEvent resolvedEvent : resolvedEvents) {
+            RecordedEvent originalEvent = resolvedEvent.getOriginalEvent();
+            DomainEvent event = new ObjectMapper().readValue(
+                    originalEvent.getEventData(),
+                    GameProposalEventType.fromString(originalEvent.getEventType()).getEventClass());
+            pastEvents.add(event);
+        }
+
+        return pastEvents;
     }
 
 }

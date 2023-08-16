@@ -33,7 +33,6 @@ import com.eventstore.dbclient.EventStoreDBConnectionString;
 import com.eventstore.dbclient.ReadResult;
 import com.eventstore.dbclient.ReadStreamOptions;
 import com.eventstore.dbclient.ResolvedEvent;
-import com.eventstore.dbclient.WriteResult;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,7 +42,6 @@ import io.github.marcodiri.lobbyservice.api.event.GameProposalCanceled;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
 import io.github.marcodiri.lobbyservice.domain.GameProposal;
 import io.github.marcodiri.lobbyservice.domain.GameProposalFactory;
-import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;
 
 @ExtendWith(MockitoExtension.class)
@@ -182,6 +180,32 @@ public class GameProposalESRepositoryIT {
             assertThat(returnedGameProposal).isInstanceOf(GameProposal.class);
         }
 
+    }
+
+    @Test
+    void readEventsForRetrievesAllPastEventsForGameProposalAggregate()
+            throws InterruptedException, ExecutionException, StreamReadException, DatabindException, IOException {
+        GameProposal gameProposal = mock(GameProposal.class);
+        UUID gameProposalId = UUID.randomUUID();
+        when(gameProposal.getId()).thenReturn(gameProposalId);
+
+        List<DomainEvent> events = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
+                new GameProposalCanceled(gameProposalId));
+
+        List<EventData> eventDataList = new ArrayList<>();
+        events.forEach(event -> {
+            EventData eventData = EventData
+                    .builderAsJson(event.getType().toString(), event)
+                    .build();
+            eventDataList.add(eventData);
+        });
+
+        String streamName = String.format("GameProposal_%s", gameProposalId);
+
+        client.appendToStream(streamName, eventDataList.iterator()).get();
+
+        List<DomainEvent> pastEvents = gameProposalESRepository.readEventsFor(gameProposal);
+        assertThat(pastEvents).containsExactlyElementsOf(events);
     }
 
 }
