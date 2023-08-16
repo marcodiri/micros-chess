@@ -51,8 +51,7 @@ public class GameProposalESRepository {
                 .appendToStream(streamNameFromGameProposal(gameProposal), eventDataList.iterator())
                 .get();
 
-        LOGGER.info("Saved events to EventStore:");
-        eventDataList.forEach(e -> LOGGER.info(e.getEventType()));
+        LOGGER.info("Saved events to EventStore: {}", events);
         LOGGER.debug(writeResult);
 
         return gameProposal;
