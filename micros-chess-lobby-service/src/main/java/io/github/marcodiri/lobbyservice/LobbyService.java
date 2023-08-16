@@ -1,11 +1,15 @@
 package io.github.marcodiri.lobbyservice;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.databind.DatabindException;
 
 import io.github.marcodiri.lobbyservice.domain.GameProposal;
 import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
@@ -31,7 +35,9 @@ public class LobbyService {
         return gameProposal;
     }
 
-    public GameProposal cancelGameProposal(UUID gameProposalId, UUID creatorId) {
+    public GameProposal cancelGameProposal(UUID gameProposalId, UUID creatorId)
+            throws StreamReadException, DatabindException, InterruptedException, ExecutionException, IOException,
+            IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         GameProposal gameProposal = gameProposalESRepository
                 .update(gameProposalId, new CancelGameProposalCommand(creatorId));
         LOGGER.info("Canceled: {}", gameProposal);

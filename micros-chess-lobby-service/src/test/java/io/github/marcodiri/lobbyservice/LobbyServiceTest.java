@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -17,6 +18,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.databind.DatabindException;
 
 import io.github.marcodiri.lobbyservice.domain.GameProposal;
 import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
@@ -69,7 +73,9 @@ class LobbyServiceTest {
     class CancelGameProposal {
 
         @Test
-        void cancelGameProposalCallsRepositoryUpdateWithCommand() {
+        void cancelGameProposalCallsRepositoryUpdateWithCommand()
+                throws StreamReadException, DatabindException, InterruptedException, ExecutionException, IOException,
+                IllegalAccessException, InvocationTargetException, NoSuchMethodException {
             UUID creatorId = UUID.randomUUID();
             UUID gameProposalId = UUID.randomUUID();
 
@@ -86,7 +92,9 @@ class LobbyServiceTest {
         }
 
         @Test
-        void cancelGameProposalReturnsAggregate() {
+        void cancelGameProposalReturnsAggregate()
+                throws StreamReadException, DatabindException, InterruptedException, ExecutionException, IOException,
+                IllegalAccessException, InvocationTargetException, NoSuchMethodException {
             GameProposal gameProposal = new GameProposal();
             when(gameProposalESRepository.update(isA(UUID.class), isA(CancelGameProposalCommand.class)))
                     .thenReturn(gameProposal);

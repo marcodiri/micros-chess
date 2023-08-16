@@ -45,20 +45,10 @@ public class GameProposalESRepository {
             InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
             ExecutionException {
         GameProposal gameProposal = gameProposalFactory.createGameProposal();
+
         List<DomainEvent> events = gameProposal.process(cmd);
-
-        List<EventData> eventDataList = new ArrayList<>();
-        for (DomainEvent event : events) {
-            gameProposal.getClass().getMethod("apply", event.getClass()).invoke(gameProposal, event);
-            EventData eventData = EventData
-                    .builderAsJson(event.getType().toString(), event)
-                    .build();
-            eventDataList.add(eventData);
-        }
-
-        WriteResult writeResult = client
-                .appendToStream(streamNameFromGameProposal(gameProposal), eventDataList.iterator())
-                .get();
+        List<EventData> appliedEventsData = applyEventsToGameProposal(gameProposal, events);
+        WriteResult writeResult = writeEventsForGameProposal(gameProposal, appliedEventsData);
 
         LOGGER.info("Saved events to EventStore: {}", events);
         LOGGER.debug(writeResult);
@@ -66,8 +56,21 @@ public class GameProposalESRepository {
         return gameProposal;
     }
 
-    public GameProposal update(UUID gameProposalId, CancelGameProposalCommand cmd) {
-        return null;
+    public GameProposal update(UUID gameProposalId, CancelGameProposalCommand cmd)
+            throws StreamReadException, DatabindException, InterruptedException, ExecutionException, IOException,
+            IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        GameProposal gameProposal = gameProposalFactory.createGameProposal();
+        List<DomainEvent> pastEvents = readEventsForGameProposal(gameProposal);
+        applyEventsToGameProposal(gameProposal, pastEvents);
+        LOGGER.info("Restored GameProposal from events: {}, \n{}", pastEvents, gameProposal);
+
+        List<DomainEvent> events = gameProposal.process(cmd);
+        List<EventData> appliedEventsData = applyEventsToGameProposal(gameProposal, events);
+        WriteResult writeResult = writeEventsForGameProposal(gameProposal, appliedEventsData);
+        LOGGER.info("Saved events to EventStore: {}", events);
+        LOGGER.debug(writeResult);
+
+        return gameProposal;
     }
 
     public GameProposal update(UUID gameProposalId, AcceptGameProposalCommand cmd) {
@@ -79,7 +82,7 @@ public class GameProposalESRepository {
         return String.format("GameProposal_%s", gameProposalId);
     }
 
-    List<DomainEvent> readEventsFor(GameProposal gameProposal)
+    List<DomainEvent> readEventsForGameProposal(GameProposal gameProposal)
             throws InterruptedException, ExecutionException, StreamReadException, DatabindException, IOException {
         ReadStreamOptions readLastEvent = ReadStreamOptions.get()
                 .forwards()
@@ -98,8 +101,39 @@ public class GameProposalESRepository {
                     GameProposalEventType.fromString(originalEvent.getEventType()).getEventClass());
             pastEvents.add(event);
         }
-
         return pastEvents;
+    }
+
+    private WriteResult writeEventsForGameProposal(GameProposal gameProposal, List<EventData> appliedEventsData)
+            throws InterruptedException, ExecutionException {
+        WriteResult writeResult = client
+                .appendToStream(streamNameFromGameProposal(gameProposal), appliedEventsData.iterator())
+                .get();
+        return writeResult;
+    }
+
+    /**
+     * Applies events to a GameProposal and returns applied events ready for EventStoreDB.
+     * @param gameProposal the GameProposal to apply events to.
+     * @param events       the events to be applied.
+     * @return a list of applied events ready to be sent to EventStoreDB.
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     * @see GameProposal
+     * @see EventData
+     */
+    private List<EventData> applyEventsToGameProposal(GameProposal gameProposal, List<DomainEvent> events)
+            throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        List<EventData> eventDataList = new ArrayList<>();
+        for (DomainEvent event : events) {
+            gameProposal.getClass().getMethod("apply", event.getClass()).invoke(gameProposal, event);
+            EventData eventData = EventData
+                    .builderAsJson(event.getType().toString(), event)
+                    .build();
+            eventDataList.add(eventData);
+        }
+        return eventDataList;
     }
 
 }

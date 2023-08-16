@@ -11,7 +11,7 @@ public abstract class GameProposalEvent implements DomainEvent {
 
     private static final long serialVersionUID = 1L;
 
-    private final UUID gameProposalId;
+    protected final UUID gameProposalId;
 
     public GameProposalEvent(final UUID gameProposalId) {
         this.gameProposalId = gameProposalId;

@@ -1,5 +1,6 @@
 package io.github.marcodiri.lobbyservice.api.event;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -35,6 +36,18 @@ public final class GameProposalAccepted extends GameProposalEvent {
 
     public UUID getAcceptorId() {
         return acceptorId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        GameProposalAccepted event = (GameProposalAccepted) o;
+        return super.equals(o)
+                && Objects.equals(creatorId, event.creatorId)
+                && Objects.equals(acceptorId, event.acceptorId);
     }
 
 }
