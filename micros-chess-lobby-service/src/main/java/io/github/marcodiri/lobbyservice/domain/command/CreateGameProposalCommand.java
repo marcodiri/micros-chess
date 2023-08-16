@@ -6,6 +6,9 @@ public class CreateGameProposalCommand {
 
     private final UUID creatorId;
 
+    /**
+     * @param creatorId the player who requested the creation of the GameProposal
+     */
     public CreateGameProposalCommand(final UUID creatorId) {
         this.creatorId = creatorId;
     }

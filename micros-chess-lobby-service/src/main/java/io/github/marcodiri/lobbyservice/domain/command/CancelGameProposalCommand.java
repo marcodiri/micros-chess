@@ -4,9 +4,12 @@ import java.util.UUID;
 
 public class CancelGameProposalCommand {
 
-    private UUID creatorId;
+    private final UUID creatorId;
 
-    public CancelGameProposalCommand(UUID creatorId) {
+    /**
+     * @param creatorId the player who created the GameProposal
+     */
+    public CancelGameProposalCommand(final UUID creatorId) {
         this.creatorId = creatorId;
     }
 
