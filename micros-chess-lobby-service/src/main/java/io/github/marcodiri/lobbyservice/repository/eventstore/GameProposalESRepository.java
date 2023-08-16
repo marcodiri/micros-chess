@@ -46,12 +46,13 @@ public class GameProposalESRepository {
         List<DomainEvent> events = gameProposal.process(cmd);
 
         List<EventData> eventDataList = new ArrayList<>();
-        events.forEach(event -> {
+        for (DomainEvent event : events) {
+            gameProposal.getClass().getMethod("apply", event.getClass()).invoke(gameProposal, event);
             EventData eventData = EventData
                     .builderAsJson(event.getType().toString(), event)
                     .build();
             eventDataList.add(eventData);
-        });
+        }
 
         WriteResult writeResult = client
                 .appendToStream(streamNameFromGameProposal(gameProposal), eventDataList.iterator())
