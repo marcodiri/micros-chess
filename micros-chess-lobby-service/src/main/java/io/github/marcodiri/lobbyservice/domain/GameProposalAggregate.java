@@ -12,11 +12,11 @@ import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand
 import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;
 
-public class GameProposal {
+public class GameProposalAggregate {
 
     private UUID id;
 
-    public GameProposal() {
+    public GameProposalAggregate() {
     }
 
     public UUID getId() {

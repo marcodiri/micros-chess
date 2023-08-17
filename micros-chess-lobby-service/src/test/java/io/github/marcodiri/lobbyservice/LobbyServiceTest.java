@@ -22,7 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 
-import io.github.marcodiri.lobbyservice.domain.GameProposal;
+import io.github.marcodiri.lobbyservice.domain.GameProposalAggregate;
 import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;
@@ -59,10 +59,10 @@ class LobbyServiceTest {
         void createGameProposalReturnsAggregate() throws IllegalAccessException, IllegalArgumentException,
                 InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
                 ExecutionException {
-            GameProposal gameProposal = new GameProposal();
+            GameProposalAggregate gameProposal = new GameProposalAggregate();
             when(gameProposalESRepository.save(any())).thenReturn(gameProposal);
 
-            GameProposal returnedGameProposal = lobbyService.createGameProposal(UUID.randomUUID());
+            GameProposalAggregate returnedGameProposal = lobbyService.createGameProposal(UUID.randomUUID());
 
             assertThat(returnedGameProposal).isEqualTo(gameProposal);
         }
@@ -95,11 +95,11 @@ class LobbyServiceTest {
         void cancelGameProposalReturnsAggregate()
                 throws StreamReadException, DatabindException, InterruptedException, ExecutionException, IOException,
                 IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-            GameProposal gameProposal = new GameProposal();
+            GameProposalAggregate gameProposal = new GameProposalAggregate();
             when(gameProposalESRepository.update(isA(UUID.class), isA(CancelGameProposalCommand.class)))
                     .thenReturn(gameProposal);
 
-            GameProposal returnedGameProposal = lobbyService.cancelGameProposal(UUID.randomUUID(), UUID.randomUUID());
+            GameProposalAggregate returnedGameProposal = lobbyService.cancelGameProposal(UUID.randomUUID(), UUID.randomUUID());
 
             assertThat(returnedGameProposal).isEqualTo(gameProposal);
         }
@@ -132,11 +132,11 @@ class LobbyServiceTest {
         void acceptGameProposalReturnsAggregate()
                 throws StreamReadException, DatabindException, IllegalAccessException, InvocationTargetException,
                 NoSuchMethodException, InterruptedException, ExecutionException, IOException {
-            GameProposal gameProposal = new GameProposal();
+            GameProposalAggregate gameProposal = new GameProposalAggregate();
             when(gameProposalESRepository.update(isA(UUID.class), isA(AcceptGameProposalCommand.class)))
                     .thenReturn(gameProposal);
 
-            GameProposal returnedGameProposal = lobbyService.acceptGameProposal(UUID.randomUUID(), UUID.randomUUID());
+            GameProposalAggregate returnedGameProposal = lobbyService.acceptGameProposal(UUID.randomUUID(), UUID.randomUUID());
 
             assertThat(returnedGameProposal).isEqualTo(gameProposal);
         }

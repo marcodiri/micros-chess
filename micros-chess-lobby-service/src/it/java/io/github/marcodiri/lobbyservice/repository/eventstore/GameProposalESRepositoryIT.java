@@ -39,7 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.marcodiri.core.domain.event.DomainEvent;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCanceled;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
-import io.github.marcodiri.lobbyservice.domain.GameProposal;
+import io.github.marcodiri.lobbyservice.domain.GameProposalAggregate;
 import io.github.marcodiri.lobbyservice.domain.GameProposalFactory;
 import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
@@ -54,7 +54,7 @@ public class GameProposalESRepositoryIT {
     private static EventStoreDBClient client;
 
     @Mock
-    GameProposal gameProposal;
+    GameProposalAggregate gameProposal;
 
     @Mock
     private GameProposalFactory gameProposalFactory;
@@ -84,7 +84,7 @@ public class GameProposalESRepositoryIT {
 
         @BeforeEach
         void setup() {
-            when(gameProposalFactory.createGameProposal()).thenReturn(gameProposal);
+            when(gameProposalFactory.createAggregate()).thenReturn(gameProposal);
             cmd = new CreateGameProposalCommand(UUID.randomUUID());
         }
 
@@ -94,7 +94,7 @@ public class GameProposalESRepositoryIT {
                 ExecutionException {
             gameProposalESRepository.save(cmd);
 
-            verify(gameProposalFactory).createGameProposal();
+            verify(gameProposalFactory).createAggregate();
         }
 
         @Test
@@ -160,9 +160,9 @@ public class GameProposalESRepositoryIT {
         void saveReturnsGameProposal() throws IllegalAccessException, IllegalArgumentException,
                 InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
                 ExecutionException {
-            GameProposal returnedGameProposal = gameProposalESRepository.save(cmd);
+            GameProposalAggregate returnedGameProposal = gameProposalESRepository.save(cmd);
 
-            assertThat(returnedGameProposal).isInstanceOf(GameProposal.class);
+            assertThat(returnedGameProposal).isInstanceOf(GameProposalAggregate.class);
         }
 
     }
@@ -194,7 +194,7 @@ public class GameProposalESRepositoryIT {
             gameProposalId = UUID.randomUUID();
             streamName = String.format("GameProposal_%s", gameProposalId);
             when(gameProposal.getId()).thenReturn(gameProposalId);
-            when(gameProposalFactory.createGameProposal()).thenReturn(gameProposal);
+            when(gameProposalFactory.createAggregate()).thenReturn(gameProposal);
             cmd = new CancelGameProposalCommand(UUID.randomUUID());
         }
 
@@ -209,7 +209,7 @@ public class GameProposalESRepositoryIT {
 
             gameProposalESRepository.update(gameProposalId, cmd);
 
-            verify(gameProposalFactory).createGameProposal();
+            verify(gameProposalFactory).createAggregate();
             InOrder inOrder = inOrder(gameProposal);
             inOrder.verify(gameProposal).apply((GameProposalCreated) events.get(0));
             inOrder.verify(gameProposal).apply((GameProposalCanceled) events.get(1));
@@ -268,8 +268,8 @@ public class GameProposalESRepositoryIT {
                     .singletonList(new GameProposalCreated(UUID.randomUUID(), UUID.randomUUID()));
             insertTestEventsInEventStore(streamName, event);
 
-            GameProposal returnedGameProposal = gameProposalESRepository.update(UUID.randomUUID(), cmd);
-            assertThat(returnedGameProposal).isInstanceOf(GameProposal.class);
+            GameProposalAggregate returnedGameProposal = gameProposalESRepository.update(UUID.randomUUID(), cmd);
+            assertThat(returnedGameProposal).isInstanceOf(GameProposalAggregate.class);
         }
 
     }
@@ -286,7 +286,7 @@ public class GameProposalESRepositoryIT {
             gameProposalId = UUID.randomUUID();
             streamName = String.format("GameProposal_%s", gameProposalId);
             when(gameProposal.getId()).thenReturn(gameProposalId);
-            when(gameProposalFactory.createGameProposal()).thenReturn(gameProposal);
+            when(gameProposalFactory.createAggregate()).thenReturn(gameProposal);
             cmd = new AcceptGameProposalCommand(UUID.randomUUID());
         }
 
@@ -301,7 +301,7 @@ public class GameProposalESRepositoryIT {
 
             gameProposalESRepository.update(gameProposalId, cmd);
 
-            verify(gameProposalFactory).createGameProposal();
+            verify(gameProposalFactory).createAggregate();
             InOrder inOrder = inOrder(gameProposal);
             inOrder.verify(gameProposal).apply((GameProposalCreated) events.get(0));
             inOrder.verify(gameProposal).apply((GameProposalCanceled) events.get(1));
@@ -360,8 +360,8 @@ public class GameProposalESRepositoryIT {
                     .singletonList(new GameProposalCreated(UUID.randomUUID(), UUID.randomUUID()));
             insertTestEventsInEventStore(streamName, event);
 
-            GameProposal returnedGameProposal = gameProposalESRepository.update(UUID.randomUUID(), cmd);
-            assertThat(returnedGameProposal).isInstanceOf(GameProposal.class);
+            GameProposalAggregate returnedGameProposal = gameProposalESRepository.update(UUID.randomUUID(), cmd);
+            assertThat(returnedGameProposal).isInstanceOf(GameProposalAggregate.class);
         }
 
     }

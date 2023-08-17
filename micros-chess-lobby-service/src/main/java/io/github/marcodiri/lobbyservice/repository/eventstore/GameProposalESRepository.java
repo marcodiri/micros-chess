@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.marcodiri.core.domain.event.DomainEvent;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalEventType;
-import io.github.marcodiri.lobbyservice.domain.GameProposal;
+import io.github.marcodiri.lobbyservice.domain.GameProposalAggregate;
 import io.github.marcodiri.lobbyservice.domain.GameProposalFactory;
 import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
@@ -41,10 +41,10 @@ public class GameProposalESRepository {
         this.gameProposalFactory = gameProposalFactory;
     }
 
-    public GameProposal save(CreateGameProposalCommand cmd) throws IllegalAccessException, IllegalArgumentException,
+    public GameProposalAggregate save(CreateGameProposalCommand cmd) throws IllegalAccessException, IllegalArgumentException,
             InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
             ExecutionException {
-        GameProposal gameProposal = gameProposalFactory.createGameProposal();
+        GameProposalAggregate gameProposal = gameProposalFactory.createAggregate();
 
         List<DomainEvent> events = gameProposal.process(cmd);
         applyAndWriteEvents(gameProposal, events);
@@ -52,10 +52,10 @@ public class GameProposalESRepository {
         return gameProposal;
     }
 
-    public GameProposal update(UUID gameProposalId, CancelGameProposalCommand cmd)
+    public GameProposalAggregate update(UUID gameProposalId, CancelGameProposalCommand cmd)
             throws StreamReadException, DatabindException, InterruptedException, ExecutionException, IOException,
             IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        GameProposal gameProposal = restoreAggregate();
+        GameProposalAggregate gameProposal = restoreAggregate();
 
         List<DomainEvent> events = gameProposal.process(cmd);
         applyAndWriteEvents(gameProposal, events);
@@ -63,10 +63,10 @@ public class GameProposalESRepository {
         return gameProposal;
     }
 
-    public GameProposal update(UUID gameProposalId, AcceptGameProposalCommand cmd)
+    public GameProposalAggregate update(UUID gameProposalId, AcceptGameProposalCommand cmd)
             throws StreamReadException, DatabindException, InterruptedException, ExecutionException, IOException,
             IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        GameProposal gameProposal = restoreAggregate();
+        GameProposalAggregate gameProposal = restoreAggregate();
 
         List<DomainEvent> events = gameProposal.process(cmd);
         applyAndWriteEvents(gameProposal, events);
@@ -74,21 +74,21 @@ public class GameProposalESRepository {
         return gameProposal;
     }
 
-    private GameProposal restoreAggregate() throws InterruptedException, ExecutionException, StreamReadException,
+    private GameProposalAggregate restoreAggregate() throws InterruptedException, ExecutionException, StreamReadException,
             DatabindException, IOException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        GameProposal gameProposal = gameProposalFactory.createGameProposal();
+        GameProposalAggregate gameProposal = gameProposalFactory.createAggregate();
         List<DomainEvent> pastEvents = readEventsForAggregate(gameProposal);
         applyEventsToAggregate(gameProposal, pastEvents);
         LOGGER.info("Restored GameProposal from events: {}, \n{}", pastEvents, gameProposal);
         return gameProposal;
     }
 
-    private String streamNameFromAggregate(GameProposal gameProposal) {
+    private String streamNameFromAggregate(GameProposalAggregate gameProposal) {
         UUID gameProposalId = gameProposal.getId();
         return String.format("GameProposal_%s", gameProposalId);
     }
 
-    List<DomainEvent> readEventsForAggregate(GameProposal gameProposal)
+    List<DomainEvent> readEventsForAggregate(GameProposalAggregate gameProposal)
             throws InterruptedException, ExecutionException, StreamReadException, DatabindException, IOException {
         ReadStreamOptions readLastEvent = ReadStreamOptions.get()
                 .forwards()
@@ -110,7 +110,7 @@ public class GameProposalESRepository {
         return pastEvents;
     }
 
-    private WriteResult writeEventsForAggregate(GameProposal gameProposal, List<EventData> appliedEventsData)
+    private WriteResult writeEventsForAggregate(GameProposalAggregate gameProposal, List<EventData> appliedEventsData)
             throws InterruptedException, ExecutionException {
         WriteResult writeResult = client
                 .appendToStream(streamNameFromAggregate(gameProposal), appliedEventsData.iterator())
@@ -128,10 +128,10 @@ public class GameProposalESRepository {
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      * @throws NoSuchMethodException
-     * @see GameProposal
+     * @see GameProposalAggregate
      * @see EventData
      */
-    private List<EventData> applyEventsToAggregate(GameProposal gameProposal, List<DomainEvent> events)
+    private List<EventData> applyEventsToAggregate(GameProposalAggregate gameProposal, List<DomainEvent> events)
             throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         List<EventData> eventDataList = new ArrayList<>();
         for (DomainEvent event : events) {
@@ -154,9 +154,9 @@ public class GameProposalESRepository {
      * @throws NoSuchMethodException
      * @throws InterruptedException
      * @throws ExecutionException
-     * @see GameProposal
+     * @see GameProposalAggregate
      */
-    private void applyAndWriteEvents(GameProposal gameProposal, List<DomainEvent> events) throws IllegalAccessException,
+    private void applyAndWriteEvents(GameProposalAggregate gameProposal, List<DomainEvent> events) throws IllegalAccessException,
             InvocationTargetException, NoSuchMethodException, InterruptedException, ExecutionException {
         List<EventData> appliedEventsData = applyEventsToAggregate(gameProposal, events);
         WriteResult writeResult = writeEventsForAggregate(gameProposal, appliedEventsData);
