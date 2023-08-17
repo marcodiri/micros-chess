@@ -110,7 +110,9 @@ class LobbyServiceTest {
     class AcceptGameProposal {
 
         @Test
-        void acceptGameProposalCallsRepositoryUpdateWithCommand() {
+        void acceptGameProposalCallsRepositoryUpdateWithCommand()
+                throws StreamReadException, DatabindException, IllegalAccessException, InvocationTargetException,
+                NoSuchMethodException, InterruptedException, ExecutionException, IOException {
             UUID acceptorId = UUID.randomUUID();
             UUID gameProposalId = UUID.randomUUID();
 
@@ -127,7 +129,9 @@ class LobbyServiceTest {
         }
 
         @Test
-        void acceptGameProposalReturnsAggregate() {
+        void acceptGameProposalReturnsAggregate()
+                throws StreamReadException, DatabindException, IllegalAccessException, InvocationTargetException,
+                NoSuchMethodException, InterruptedException, ExecutionException, IOException {
             GameProposal gameProposal = new GameProposal();
             when(gameProposalESRepository.update(isA(UUID.class), isA(AcceptGameProposalCommand.class)))
                     .thenReturn(gameProposal);

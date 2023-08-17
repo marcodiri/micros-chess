@@ -8,6 +8,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import io.github.marcodiri.core.domain.event.DomainEvent;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCanceled;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
+import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;
 
@@ -32,6 +33,10 @@ public class GameProposal {
     }
 
     public List<DomainEvent> process(CancelGameProposalCommand command) {
+        return null;
+    }
+
+    public List<DomainEvent> process(AcceptGameProposalCommand command) {
         return null;
     }
 

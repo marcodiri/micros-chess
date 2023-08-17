@@ -44,7 +44,9 @@ public class LobbyService {
         return gameProposal;
     }
 
-    public GameProposal acceptGameProposal(UUID gameProposalId, UUID acceptorId) {
+    public GameProposal acceptGameProposal(UUID gameProposalId, UUID acceptorId)
+            throws StreamReadException, DatabindException, InterruptedException, ExecutionException, IOException,
+            IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         GameProposal gameProposal = gameProposalESRepository
                 .update(gameProposalId, new AcceptGameProposalCommand(acceptorId));
         LOGGER.info("Accepted: {}", gameProposal);
