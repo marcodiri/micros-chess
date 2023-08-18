@@ -146,4 +146,82 @@ public class GameProposalAggregateTest {
 
     }
 
+    @Nested
+    class applyGameProposalCreated {
+
+        private UUID gameProposalId, creatorId;
+        private GameProposalCreated event;
+
+        @Spy
+        private GameProposalAggregate gameProposal;
+
+        @BeforeEach
+        void createCommand() {
+            gameProposalId = UUID.randomUUID();
+            creatorId = UUID.randomUUID();
+            event = new GameProposalCreated(gameProposalId, creatorId);
+        }
+
+        @Test
+        void applyChangesAggregateState() {
+            gameProposal.apply(event);
+
+            assertThat(gameProposal.getId()).isEqualTo(gameProposalId);
+            assertThat(gameProposal.getCreatorId()).isEqualTo(creatorId);
+            assertThat(gameProposal.getState()).isEqualTo(GameProposalState.PENDING);
+        }
+
+    }
+
+    @Nested
+    class applyGameProposalCanceled {
+
+        private UUID gameProposalId;
+        private GameProposalCanceled event;
+
+        @Spy
+        private GameProposalAggregate gameProposal;
+
+        @BeforeEach
+        void createCommand() {
+            gameProposalId = UUID.randomUUID();
+            event = new GameProposalCanceled(gameProposalId);
+        }
+
+        @Test
+        void applyChangesAggregateState() {
+            gameProposal.apply(event);
+
+            assertThat(gameProposal.getState()).isEqualTo(GameProposalState.CANCELED);
+        }
+
+    }
+
+    @Nested
+    class applyGameProposalAccepted {
+
+        private UUID gameProposalId, creatorId, acceptorId;
+        private GameProposalAccepted event;
+
+        @Spy
+        private GameProposalAggregate gameProposal;
+
+        @BeforeEach
+        void createCommand() {
+            gameProposalId = UUID.randomUUID();
+            creatorId = UUID.randomUUID();
+            acceptorId = UUID.randomUUID();
+            event = new GameProposalAccepted(gameProposalId, creatorId, acceptorId);
+        }
+
+        @Test
+        void applyChangesAggregateState() {
+            gameProposal.apply(event);
+
+            assertThat(gameProposal.getAcceptorId()).isEqualTo(acceptorId);
+            assertThat(gameProposal.getState()).isEqualTo(GameProposalState.ACCEPTED);
+        }
+
+    }
+
 }

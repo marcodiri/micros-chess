@@ -20,6 +20,7 @@ public class GameProposalAggregate {
 
     private UUID id;
     private UUID creatorId;
+    private UUID acceptorId;
     private GameProposalState state;
 
     private static final Logger LOGGER = LogManager.getLogger(GameProposalAggregate.class);
@@ -37,6 +38,10 @@ public class GameProposalAggregate {
 
     UUID getCreatorId() {
         return creatorId;
+    }
+
+    UUID getAcceptorId() {
+        return acceptorId;
     }
 
     GameProposalState getState() {
@@ -74,9 +79,18 @@ public class GameProposalAggregate {
     }
 
     public void apply(GameProposalCreated event) {
+        this.id = event.getGameProposalId();
+        this.creatorId = event.getCreatorId();
+        this.state = GameProposalState.PENDING;
     }
 
     public void apply(GameProposalCanceled event) {
+        this.state = GameProposalState.CANCELED;
+    }
+
+    public void apply(GameProposalAccepted event) {
+        this.acceptorId = event.getAcceptorId();
+        this.state = GameProposalState.ACCEPTED;
     }
 
 }
