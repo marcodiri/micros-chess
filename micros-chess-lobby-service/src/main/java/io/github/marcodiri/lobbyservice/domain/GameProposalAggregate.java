@@ -1,9 +1,12 @@
 package io.github.marcodiri.lobbyservice.domain;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import io.github.marcodiri.core.domain.event.DomainEvent;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCanceled;
@@ -16,11 +19,17 @@ public class GameProposalAggregate {
 
     private UUID id;
 
+    private static final Logger LOGGER = LogManager.getLogger(GameProposalAggregate.class);
+
     public GameProposalAggregate() {
     }
 
     public UUID getId() {
         return id;
+    }
+
+    UUID generateId() {
+        return UUID.randomUUID();
     }
 
     @Override
@@ -29,7 +38,10 @@ public class GameProposalAggregate {
     }
 
     public List<DomainEvent> process(CreateGameProposalCommand command) {
-        return null;
+        LOGGER.info("Calling process for CreateGameProposalCommand: {}", command);
+        UUID gameProposalId = generateId();
+        return Collections.singletonList(
+                new GameProposalCreated(gameProposalId, command.getCreatorId()));
     }
 
     public List<DomainEvent> process(CancelGameProposalCommand command) {
