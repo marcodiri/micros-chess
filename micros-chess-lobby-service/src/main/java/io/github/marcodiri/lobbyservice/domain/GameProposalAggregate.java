@@ -79,16 +79,19 @@ public class GameProposalAggregate {
     }
 
     public void apply(GameProposalCreated event) {
+        LOGGER.info("Calling apply for GameProposalCreated: {}", event);
         this.id = event.getGameProposalId();
         this.creatorId = event.getCreatorId();
         this.state = GameProposalState.PENDING;
     }
 
     public void apply(GameProposalCanceled event) {
+        LOGGER.info("Calling apply for GameProposalCanceled: {}", event);
         this.state = GameProposalState.CANCELED;
     }
 
     public void apply(GameProposalAccepted event) {
+        LOGGER.info("Calling apply for GameProposalAccepted: {}", event);
         this.acceptorId = event.getAcceptorId();
         this.state = GameProposalState.ACCEPTED;
     }
