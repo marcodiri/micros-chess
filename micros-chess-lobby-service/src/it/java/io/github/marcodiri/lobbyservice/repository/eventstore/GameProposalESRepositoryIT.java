@@ -1,6 +1,7 @@
 package io.github.marcodiri.lobbyservice.repository.eventstore;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
@@ -77,13 +78,26 @@ public class GameProposalESRepositoryIT {
         gameProposalESRepository = new GameProposalESRepository(client, gameProposalFactory);
     }
 
+    @Test
+    void writeEventsForAggregateThrowsIfAggregateIdIsNull() {
+        when(gameProposal.getId()).thenReturn(null);
+
+        assertThatThrownBy(() -> {
+            gameProposalESRepository.writeEventsForAggregate(gameProposal, Collections.emptyList());
+        }).isInstanceOf(RuntimeException.class)
+        .hasMessage("GameProposal id is null");
+    }
+
     @Nested
     class save {
 
         private CreateGameProposalCommand cmd;
+        private UUID gameProposalId;
 
         @BeforeEach
         void setup() {
+            gameProposalId = UUID.randomUUID();
+            when(gameProposal.getId()).thenReturn(gameProposalId);
             when(gameProposalFactory.createAggregate()).thenReturn(gameProposal);
             cmd = new CreateGameProposalCommand(UUID.randomUUID());
         }
@@ -92,6 +106,7 @@ public class GameProposalESRepositoryIT {
         void saveCreatesNewGameProposal() throws IllegalAccessException, IllegalArgumentException,
                 InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
                 ExecutionException {
+
             gameProposalESRepository.save(cmd);
 
             verify(gameProposalFactory).createAggregate();
@@ -101,7 +116,6 @@ public class GameProposalESRepositoryIT {
         void saveCallsProcessAndApplyForASingleEvent() throws IllegalAccessException, IllegalArgumentException,
                 InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
                 ExecutionException {
-            when(gameProposal.getId()).thenReturn(UUID.randomUUID());
             List<DomainEvent> event = Collections
                     .singletonList(new GameProposalCreated(UUID.randomUUID(), UUID.randomUUID()));
             when(gameProposal.process(isA(CreateGameProposalCommand.class))).thenReturn(event);
@@ -117,7 +131,6 @@ public class GameProposalESRepositoryIT {
         void saveCallsProcessAndApplyForMultipleEvents() throws IllegalAccessException, IllegalArgumentException,
                 InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
                 ExecutionException {
-            when(gameProposal.getId()).thenReturn(UUID.randomUUID());
             List<DomainEvent> events = Arrays.asList(new GameProposalCreated(UUID.randomUUID(), UUID.randomUUID()),
                     new GameProposalCanceled(UUID.randomUUID()));
             when(gameProposal.process(isA(CreateGameProposalCommand.class))).thenReturn(events);
@@ -134,8 +147,6 @@ public class GameProposalESRepositoryIT {
         void savePersistsEventsInEventStore() throws InterruptedException, ExecutionException, IllegalAccessException,
                 IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException,
                 StreamReadException, DatabindException, IOException {
-            UUID gameProposalId = UUID.randomUUID();
-            when(gameProposal.getId()).thenReturn(gameProposalId);
             List<DomainEvent> events = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
                     new GameProposalCanceled(gameProposalId));
             when(gameProposal.process(isA(CreateGameProposalCommand.class))).thenReturn(events);
@@ -171,13 +182,12 @@ public class GameProposalESRepositoryIT {
     void readEventsForGameProposalRetrievesAllPastEventsForAggregate()
             throws InterruptedException, ExecutionException, StreamReadException, DatabindException, IOException {
         UUID gameProposalId = UUID.randomUUID();
-        when(gameProposal.getId()).thenReturn(gameProposalId);
         List<DomainEvent> events = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
                 new GameProposalCanceled(gameProposalId));
         String streamName = String.format("GameProposal_%s", gameProposalId);
         insertTestEventsInEventStore(streamName, events);
 
-        List<DomainEvent> pastEvents = gameProposalESRepository.readEventsForAggregate(gameProposal);
+        List<DomainEvent> pastEvents = gameProposalESRepository.readEventsForAggregate(gameProposalId);
 
         assertThat(pastEvents).containsExactlyElementsOf(events);
     }
@@ -265,10 +275,10 @@ public class GameProposalESRepositoryIT {
                 InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
                 ExecutionException, StreamReadException, DatabindException, IOException {
             List<DomainEvent> event = Collections
-                    .singletonList(new GameProposalCreated(UUID.randomUUID(), UUID.randomUUID()));
+                    .singletonList(new GameProposalCreated(gameProposalId, UUID.randomUUID()));
             insertTestEventsInEventStore(streamName, event);
 
-            GameProposalAggregate returnedGameProposal = gameProposalESRepository.update(UUID.randomUUID(), cmd);
+            GameProposalAggregate returnedGameProposal = gameProposalESRepository.update(gameProposalId, cmd);
             assertThat(returnedGameProposal).isInstanceOf(GameProposalAggregate.class);
         }
 
@@ -357,10 +367,10 @@ public class GameProposalESRepositoryIT {
                 InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
                 ExecutionException, StreamReadException, DatabindException, IOException {
             List<DomainEvent> event = Collections
-                    .singletonList(new GameProposalCreated(UUID.randomUUID(), UUID.randomUUID()));
+                    .singletonList(new GameProposalCreated(gameProposalId, UUID.randomUUID()));
             insertTestEventsInEventStore(streamName, event);
 
-            GameProposalAggregate returnedGameProposal = gameProposalESRepository.update(UUID.randomUUID(), cmd);
+            GameProposalAggregate returnedGameProposal = gameProposalESRepository.update(gameProposalId, cmd);
             assertThat(returnedGameProposal).isInstanceOf(GameProposalAggregate.class);
         }
 
