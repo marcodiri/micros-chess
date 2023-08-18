@@ -55,7 +55,7 @@ public class GameProposalESRepository {
     public GameProposal update(UUID gameProposalId, CancelGameProposalCommand cmd)
             throws StreamReadException, DatabindException, InterruptedException, ExecutionException, IOException,
             IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        GameProposal gameProposal = restoreAggregate();
+        GameProposal gameProposal = restoreAggregate(gameProposalId);
 
         List<DomainEvent> events = gameProposal.process(cmd);
         applyAndWriteEvents(gameProposal, events);
@@ -66,7 +66,7 @@ public class GameProposalESRepository {
     public GameProposal update(UUID gameProposalId, AcceptGameProposalCommand cmd)
             throws StreamReadException, DatabindException, InterruptedException, ExecutionException, IOException,
             IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        GameProposal gameProposal = restoreAggregate();
+        GameProposal gameProposal = restoreAggregate(gameProposalId);
 
         List<DomainEvent> events = gameProposal.process(cmd);
         applyAndWriteEvents(gameProposal, events);
@@ -74,27 +74,26 @@ public class GameProposalESRepository {
         return gameProposal;
     }
 
-    private GameProposal restoreAggregate() throws InterruptedException, ExecutionException, StreamReadException,
+    private GameProposal restoreAggregate(UUID gameProposalId) throws InterruptedException, ExecutionException, StreamReadException,
             DatabindException, IOException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         GameProposal gameProposal = gameProposalFactory.createGameProposal();
-        List<DomainEvent> pastEvents = readEventsForAggregate(gameProposal);
+        List<DomainEvent> pastEvents = readEventsForAggregate(gameProposalId);
         applyEventsToAggregate(gameProposal, pastEvents);
         LOGGER.info("Restored GameProposal from events: {}, \n{}", pastEvents, gameProposal);
         return gameProposal;
     }
 
-    private String streamNameFromAggregate(GameProposal gameProposal) {
-        UUID gameProposalId = gameProposal.getId();
+    private String streamNameFromAggregateId(UUID gameProposalId) {
         return String.format("GameProposal_%s", gameProposalId);
     }
 
-    List<DomainEvent> readEventsForAggregate(GameProposal gameProposal)
+    List<DomainEvent> readEventsForAggregate(UUID gameProposalId)
             throws InterruptedException, ExecutionException, StreamReadException, DatabindException, IOException {
         ReadStreamOptions readLastEvent = ReadStreamOptions.get()
                 .forwards()
                 .fromStart();
 
-        ReadResult result = client.readStream(streamNameFromAggregate(gameProposal), readLastEvent)
+        ReadResult result = client.readStream(streamNameFromAggregateId(gameProposalId), readLastEvent)
                 .get();
 
         List<ResolvedEvent> resolvedEvents = result.getEvents();
@@ -110,10 +109,14 @@ public class GameProposalESRepository {
         return pastEvents;
     }
 
-    private WriteResult writeEventsForAggregate(GameProposal gameProposal, List<EventData> appliedEventsData)
+    WriteResult writeEventsForAggregate(GameProposal gameProposal, List<EventData> appliedEventsData)
             throws InterruptedException, ExecutionException {
+        UUID gameProposalId = gameProposal.getId();
+        if (gameProposalId == null) {
+            throw new RuntimeException("GameProposal id is null");
+        }
         WriteResult writeResult = client
-                .appendToStream(streamNameFromAggregate(gameProposal), appliedEventsData.iterator())
+                .appendToStream(streamNameFromAggregateId(gameProposalId), appliedEventsData.iterator())
                 .get();
         return writeResult;
     }
