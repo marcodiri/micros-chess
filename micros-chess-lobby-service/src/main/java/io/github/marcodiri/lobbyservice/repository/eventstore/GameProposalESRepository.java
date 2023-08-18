@@ -25,6 +25,7 @@ import io.github.marcodiri.core.domain.event.DomainEvent;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalEventType;
 import io.github.marcodiri.lobbyservice.domain.GameProposalAggregate;
 import io.github.marcodiri.lobbyservice.domain.GameProposalFactory;
+import io.github.marcodiri.lobbyservice.domain.UnsupportedStateTransitionException;
 import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;
@@ -41,7 +42,8 @@ public class GameProposalESRepository {
         this.gameProposalFactory = gameProposalFactory;
     }
 
-    public GameProposalAggregate save(CreateGameProposalCommand cmd) throws IllegalAccessException, IllegalArgumentException,
+    public GameProposalAggregate save(CreateGameProposalCommand cmd)
+            throws IllegalAccessException, IllegalArgumentException,
             InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
             ExecutionException {
         GameProposalAggregate gameProposal = gameProposalFactory.createAggregate();
@@ -54,7 +56,8 @@ public class GameProposalESRepository {
 
     public GameProposalAggregate update(UUID gameProposalId, CancelGameProposalCommand cmd)
             throws StreamReadException, DatabindException, InterruptedException, ExecutionException, IOException,
-            IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+            IllegalAccessException, InvocationTargetException, NoSuchMethodException,
+            UnsupportedStateTransitionException {
         GameProposalAggregate gameProposal = restoreAggregate(gameProposalId);
 
         List<DomainEvent> events = gameProposal.process(cmd);
@@ -65,7 +68,8 @@ public class GameProposalESRepository {
 
     public GameProposalAggregate update(UUID gameProposalId, AcceptGameProposalCommand cmd)
             throws StreamReadException, DatabindException, InterruptedException, ExecutionException, IOException,
-            IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+            IllegalAccessException, InvocationTargetException, NoSuchMethodException,
+            UnsupportedStateTransitionException {
         GameProposalAggregate gameProposal = restoreAggregate(gameProposalId);
 
         List<DomainEvent> events = gameProposal.process(cmd);
@@ -74,7 +78,8 @@ public class GameProposalESRepository {
         return gameProposal;
     }
 
-    private GameProposalAggregate restoreAggregate(UUID gameProposalId) throws InterruptedException, ExecutionException, StreamReadException,
+    private GameProposalAggregate restoreAggregate(UUID gameProposalId)
+            throws InterruptedException, ExecutionException, StreamReadException,
             DatabindException, IOException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
         GameProposalAggregate gameProposal = gameProposalFactory.createAggregate();
         List<DomainEvent> pastEvents = readEventsForAggregate(gameProposalId);
@@ -159,7 +164,8 @@ public class GameProposalESRepository {
      * @throws ExecutionException
      * @see GameProposalAggregate
      */
-    private void applyAndWriteEvents(GameProposalAggregate gameProposal, List<DomainEvent> events) throws IllegalAccessException,
+    private void applyAndWriteEvents(GameProposalAggregate gameProposal, List<DomainEvent> events)
+            throws IllegalAccessException,
             InvocationTargetException, NoSuchMethodException, InterruptedException, ExecutionException {
         List<EventData> appliedEventsData = applyEventsToAggregate(gameProposal, events);
         WriteResult writeResult = writeEventsForAggregate(gameProposal, appliedEventsData);

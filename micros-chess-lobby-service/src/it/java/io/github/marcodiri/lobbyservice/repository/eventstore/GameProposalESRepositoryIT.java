@@ -42,6 +42,7 @@ import io.github.marcodiri.lobbyservice.api.event.GameProposalCanceled;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
 import io.github.marcodiri.lobbyservice.domain.GameProposalAggregate;
 import io.github.marcodiri.lobbyservice.domain.GameProposalFactory;
+import io.github.marcodiri.lobbyservice.domain.UnsupportedStateTransitionException;
 import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;
@@ -212,7 +213,8 @@ public class GameProposalESRepositoryIT {
         void updateCreatesNewGameProposalAndAppliesPastEvents() throws IllegalAccessException, IllegalArgumentException,
                 InvocationTargetException, NoSuchMethodException, SecurityException,
                 InterruptedException,
-                ExecutionException, StreamReadException, DatabindException, IOException {
+                ExecutionException, StreamReadException, DatabindException, IOException,
+                UnsupportedStateTransitionException {
             List<DomainEvent> events = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
                     new GameProposalCanceled(gameProposalId));
             insertTestEventsInEventStore(streamName, events);
@@ -228,7 +230,8 @@ public class GameProposalESRepositoryIT {
         @Test
         void updateCallsProcessAndApplyForMultipleNewEvents()
                 throws StreamReadException, DatabindException, IllegalAccessException, InvocationTargetException,
-                NoSuchMethodException, InterruptedException, ExecutionException, IOException {
+                NoSuchMethodException, InterruptedException, ExecutionException, IOException,
+                UnsupportedStateTransitionException {
             List<DomainEvent> pastEvents = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
                     new GameProposalCanceled(gameProposalId));
             List<DomainEvent> newEvents = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
@@ -247,7 +250,8 @@ public class GameProposalESRepositoryIT {
         @Test
         void updatePersistsNewEventsInEventStore()
                 throws StreamReadException, DatabindException, IllegalAccessException, InvocationTargetException,
-                NoSuchMethodException, InterruptedException, ExecutionException, IOException {
+                NoSuchMethodException, InterruptedException, ExecutionException, IOException,
+                UnsupportedStateTransitionException {
             List<DomainEvent> pastEvents = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
                     new GameProposalCanceled(gameProposalId));
             List<DomainEvent> newEvents = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
@@ -273,7 +277,8 @@ public class GameProposalESRepositoryIT {
         @Test
         void updateReturnsGameProposal() throws IllegalAccessException, IllegalArgumentException,
                 InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
-                ExecutionException, StreamReadException, DatabindException, IOException {
+                ExecutionException, StreamReadException, DatabindException, IOException,
+                UnsupportedStateTransitionException {
             List<DomainEvent> event = Collections
                     .singletonList(new GameProposalCreated(gameProposalId, UUID.randomUUID()));
             insertTestEventsInEventStore(streamName, event);
@@ -304,7 +309,8 @@ public class GameProposalESRepositoryIT {
         void updateCreatesNewGameProposalAndAppliesPastEvents() throws IllegalAccessException, IllegalArgumentException,
                 InvocationTargetException, NoSuchMethodException, SecurityException,
                 InterruptedException,
-                ExecutionException, StreamReadException, DatabindException, IOException {
+                ExecutionException, StreamReadException, DatabindException, IOException,
+                UnsupportedStateTransitionException {
             List<DomainEvent> events = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
                     new GameProposalCanceled(gameProposalId));
             insertTestEventsInEventStore(streamName, events);
@@ -320,7 +326,8 @@ public class GameProposalESRepositoryIT {
         @Test
         void updateCallsProcessAndApplyForMultipleNewEvents()
                 throws StreamReadException, DatabindException, IllegalAccessException, InvocationTargetException,
-                NoSuchMethodException, InterruptedException, ExecutionException, IOException {
+                NoSuchMethodException, InterruptedException, ExecutionException, IOException,
+                UnsupportedStateTransitionException {
             List<DomainEvent> pastEvents = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
                     new GameProposalCanceled(gameProposalId));
             List<DomainEvent> newEvents = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
@@ -339,7 +346,8 @@ public class GameProposalESRepositoryIT {
         @Test
         void updatePersistsNewEventsInEventStore()
                 throws StreamReadException, DatabindException, IllegalAccessException, InvocationTargetException,
-                NoSuchMethodException, InterruptedException, ExecutionException, IOException {
+                NoSuchMethodException, InterruptedException, ExecutionException, IOException,
+                UnsupportedStateTransitionException {
             List<DomainEvent> pastEvents = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
                     new GameProposalCanceled(gameProposalId));
             List<DomainEvent> newEvents = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
@@ -365,7 +373,8 @@ public class GameProposalESRepositoryIT {
         @Test
         void updateReturnsGameProposal() throws IllegalAccessException, IllegalArgumentException,
                 InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
-                ExecutionException, StreamReadException, DatabindException, IOException {
+                ExecutionException, StreamReadException, DatabindException, IOException,
+                UnsupportedStateTransitionException {
             List<DomainEvent> event = Collections
                     .singletonList(new GameProposalCreated(gameProposalId, UUID.randomUUID()));
             insertTestEventsInEventStore(streamName, event);

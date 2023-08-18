@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 
 import io.github.marcodiri.lobbyservice.domain.GameProposalAggregate;
+import io.github.marcodiri.lobbyservice.domain.UnsupportedStateTransitionException;
 import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;
@@ -27,7 +28,8 @@ public class LobbyService {
         this.gameProposalESRepository = gameProposalESRepository;
     }
 
-    public GameProposalAggregate createGameProposal(UUID creatorId) throws IllegalAccessException, IllegalArgumentException,
+    public GameProposalAggregate createGameProposal(UUID creatorId)
+            throws IllegalAccessException, IllegalArgumentException,
             InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
             ExecutionException {
         GameProposalAggregate gameProposal = gameProposalESRepository.save(new CreateGameProposalCommand(creatorId));
@@ -37,7 +39,8 @@ public class LobbyService {
 
     public GameProposalAggregate cancelGameProposal(UUID gameProposalId, UUID creatorId)
             throws StreamReadException, DatabindException, InterruptedException, ExecutionException, IOException,
-            IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+            IllegalAccessException, InvocationTargetException, NoSuchMethodException,
+            UnsupportedStateTransitionException {
         GameProposalAggregate gameProposal = gameProposalESRepository
                 .update(gameProposalId, new CancelGameProposalCommand(creatorId));
         LOGGER.info("Canceled: {}", gameProposal);
@@ -46,7 +49,8 @@ public class LobbyService {
 
     public GameProposalAggregate acceptGameProposal(UUID gameProposalId, UUID acceptorId)
             throws StreamReadException, DatabindException, InterruptedException, ExecutionException, IOException,
-            IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+            IllegalAccessException, InvocationTargetException, NoSuchMethodException,
+            UnsupportedStateTransitionException {
         GameProposalAggregate gameProposal = gameProposalESRepository
                 .update(gameProposalId, new AcceptGameProposalCommand(acceptorId));
         LOGGER.info("Accepted: {}", gameProposal);

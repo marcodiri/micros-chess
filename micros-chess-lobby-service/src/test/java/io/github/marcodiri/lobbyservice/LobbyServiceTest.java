@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 
 import io.github.marcodiri.lobbyservice.domain.GameProposalAggregate;
+import io.github.marcodiri.lobbyservice.domain.UnsupportedStateTransitionException;
 import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;
@@ -75,7 +76,8 @@ class LobbyServiceTest {
         @Test
         void cancelGameProposalCallsRepositoryUpdateWithCommand()
                 throws StreamReadException, DatabindException, InterruptedException, ExecutionException, IOException,
-                IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+                IllegalAccessException, InvocationTargetException, NoSuchMethodException,
+                UnsupportedStateTransitionException {
             UUID creatorId = UUID.randomUUID();
             UUID gameProposalId = UUID.randomUUID();
 
@@ -94,12 +96,14 @@ class LobbyServiceTest {
         @Test
         void cancelGameProposalReturnsAggregate()
                 throws StreamReadException, DatabindException, InterruptedException, ExecutionException, IOException,
-                IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+                IllegalAccessException, InvocationTargetException, NoSuchMethodException,
+                UnsupportedStateTransitionException {
             GameProposalAggregate gameProposal = new GameProposalAggregate();
             when(gameProposalESRepository.update(isA(UUID.class), isA(CancelGameProposalCommand.class)))
                     .thenReturn(gameProposal);
 
-            GameProposalAggregate returnedGameProposal = lobbyService.cancelGameProposal(UUID.randomUUID(), UUID.randomUUID());
+            GameProposalAggregate returnedGameProposal = lobbyService.cancelGameProposal(UUID.randomUUID(),
+                    UUID.randomUUID());
 
             assertThat(returnedGameProposal).isEqualTo(gameProposal);
         }
@@ -112,7 +116,8 @@ class LobbyServiceTest {
         @Test
         void acceptGameProposalCallsRepositoryUpdateWithCommand()
                 throws StreamReadException, DatabindException, IllegalAccessException, InvocationTargetException,
-                NoSuchMethodException, InterruptedException, ExecutionException, IOException {
+                NoSuchMethodException, InterruptedException, ExecutionException, IOException,
+                UnsupportedStateTransitionException {
             UUID acceptorId = UUID.randomUUID();
             UUID gameProposalId = UUID.randomUUID();
 
@@ -131,12 +136,14 @@ class LobbyServiceTest {
         @Test
         void acceptGameProposalReturnsAggregate()
                 throws StreamReadException, DatabindException, IllegalAccessException, InvocationTargetException,
-                NoSuchMethodException, InterruptedException, ExecutionException, IOException {
+                NoSuchMethodException, InterruptedException, ExecutionException, IOException,
+                UnsupportedStateTransitionException {
             GameProposalAggregate gameProposal = new GameProposalAggregate();
             when(gameProposalESRepository.update(isA(UUID.class), isA(AcceptGameProposalCommand.class)))
                     .thenReturn(gameProposal);
 
-            GameProposalAggregate returnedGameProposal = lobbyService.acceptGameProposal(UUID.randomUUID(), UUID.randomUUID());
+            GameProposalAggregate returnedGameProposal = lobbyService.acceptGameProposal(UUID.randomUUID(),
+                    UUID.randomUUID());
 
             assertThat(returnedGameProposal).isEqualTo(gameProposal);
         }
