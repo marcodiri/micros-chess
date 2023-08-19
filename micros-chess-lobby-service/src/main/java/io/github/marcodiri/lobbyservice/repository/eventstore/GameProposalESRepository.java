@@ -29,15 +29,17 @@ import io.github.marcodiri.lobbyservice.domain.UnsupportedStateTransitionExcepti
 import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;
+import jakarta.inject.Inject;
 
 public class GameProposalESRepository {
 
-    private EventStoreDBClient client;
-    private GameProposalFactory gameProposalFactory;
+    private final EventStoreDBClient client;
+    private final GameProposalFactory gameProposalFactory;
 
     private static final Logger LOGGER = LogManager.getLogger(GameProposalESRepository.class);
 
-    public GameProposalESRepository(EventStoreDBClient client, GameProposalFactory gameProposalFactory) {
+    @Inject
+    public GameProposalESRepository(final EventStoreDBClient client, final GameProposalFactory gameProposalFactory) {
         this.client = client;
         this.gameProposalFactory = gameProposalFactory;
     }

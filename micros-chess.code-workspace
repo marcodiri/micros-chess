@@ -27,10 +27,6 @@
         "command": "docker:stop docker:start",
         "debug": false
       }
-    ],
-    "cSpell.words": [
-      "Databind",
-      "lobbyservice"
     ]
   }
 }

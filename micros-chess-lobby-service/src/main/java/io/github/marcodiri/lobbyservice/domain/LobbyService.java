@@ -15,14 +15,16 @@ import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand
 import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;
 import io.github.marcodiri.lobbyservice.repository.eventstore.GameProposalESRepository;
+import jakarta.inject.Inject;
 
 public class LobbyService {
 
-    private GameProposalESRepository gameProposalESRepository;
+    private final GameProposalESRepository gameProposalESRepository;
 
     private static final Logger LOGGER = LogManager.getLogger(LobbyService.class);
 
-    public LobbyService(GameProposalESRepository gameProposalESRepository) {
+    @Inject
+    public LobbyService(final GameProposalESRepository gameProposalESRepository) {
         this.gameProposalESRepository = gameProposalESRepository;
     }
 
