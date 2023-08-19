@@ -1,0 +1,36 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "maven.terminal.favorites": [
+      {
+        "command": "clean package",
+        "debug": false
+      },
+      {
+        "command": "clean package -DskipTests",
+        "debug": false
+      },
+      {
+        "command": "docker:start",
+        "debug": false
+      },
+      {
+        "command": "docker:stop",
+        "debug": false
+      },
+      {
+        "command": "docker:stop docker:start",
+        "debug": false
+      }
+    ],
+    "cSpell.words": [
+      "Databind",
+      "lobbyservice"
+    ]
+  }
+}
