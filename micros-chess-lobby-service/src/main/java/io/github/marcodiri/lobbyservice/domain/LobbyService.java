@@ -1,4 +1,4 @@
-package io.github.marcodiri.lobbyservice;
+package io.github.marcodiri.lobbyservice.domain;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -11,8 +11,6 @@ import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 
-import io.github.marcodiri.lobbyservice.domain.GameProposalAggregate;
-import io.github.marcodiri.lobbyservice.domain.UnsupportedStateTransitionException;
 import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;

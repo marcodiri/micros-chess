@@ -1,4 +1,4 @@
-package io.github.marcodiri.lobbyservice;
+package io.github.marcodiri.lobbyservice.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,8 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 
-import io.github.marcodiri.lobbyservice.domain.GameProposalAggregate;
-import io.github.marcodiri.lobbyservice.domain.UnsupportedStateTransitionException;
 import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;
