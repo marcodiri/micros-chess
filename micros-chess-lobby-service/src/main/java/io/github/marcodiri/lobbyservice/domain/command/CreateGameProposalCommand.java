@@ -1,5 +1,6 @@
 package io.github.marcodiri.lobbyservice.domain.command;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class CreateGameProposalCommand extends GameProposalCommand {
@@ -15,6 +16,16 @@ public class CreateGameProposalCommand extends GameProposalCommand {
 
     public UUID getCreatorId() {
         return creatorId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        CreateGameProposalCommand command = (CreateGameProposalCommand) o;
+        return Objects.equals(creatorId, command.creatorId);
     }
 
 }
