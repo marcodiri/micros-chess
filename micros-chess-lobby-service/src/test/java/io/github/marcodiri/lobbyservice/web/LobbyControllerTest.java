@@ -158,4 +158,49 @@ public class LobbyControllerTest {
         }
     }
 
+    @Nested
+    class AcceptGameProposal {
+
+        @Test
+        void OKResponse()
+                throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+                NoSuchMethodException, SecurityException, InterruptedException, ExecutionException, StreamReadException,
+                DatabindException, IOException, UnsupportedStateTransitionException {
+            UUID gameProposalId = UUID.randomUUID();
+
+            given()
+                    .contentType(ContentType.JSON)
+                    .body("{ \"gameProposalId\" : \"" + gameProposalId + "\", \"acceptorId\" : \"" + testPlayerId
+                            + "\" }")
+                    .when()
+                    .post(server.target("/lobby/accept-game-proposal").getUri())
+                    .then()
+                    .assertThat()
+                    .statusCode(equalTo(200));
+
+            verify(lobbyService).acceptGameProposal(gameProposalId, testPlayerId);
+        }
+
+        @Test
+        void internalErrorOnException() throws IllegalAccessException, IllegalArgumentException,
+                InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
+                ExecutionException, StreamReadException, DatabindException, IOException,
+                UnsupportedStateTransitionException {
+            UUID gameProposalId = UUID.randomUUID();
+            when(lobbyService.acceptGameProposal(any(UUID.class), any(UUID.class)))
+                    .thenThrow(new IllegalArgumentException());
+
+            given()
+                    .contentType(ContentType.JSON)
+                    .body("{ \"gameProposalId\" : \"" + gameProposalId + "\", \"acceptorId\" : \"" + testPlayerId
+                            + "\" }")
+                    .when()
+                    .post(server.target("/lobby/accept-game-proposal").getUri())
+                    .then()
+                    .assertThat()
+                    .statusCode(equalTo(500));
+        }
+
+    }
+
 }

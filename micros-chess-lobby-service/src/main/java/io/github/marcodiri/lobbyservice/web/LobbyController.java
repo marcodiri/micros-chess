@@ -78,4 +78,26 @@ public class LobbyController {
                 .build();
     }
 
+    @POST
+    @Path("/accept-game-proposal")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response acceptGameProposal(AcceptGameProposalRequest request) {
+        LOGGER.info("Received AcceptGameProposalRequest: {}", request);
+
+        try {
+            lobbyService.acceptGameProposal(request.getGameProposalId(), request.getAcceptorId());
+            LOGGER.info("Sending OK");
+            return Response
+                    .ok()
+                    .build();
+        } catch (Exception e) {
+            LOGGER.catching(e);
+        }
+
+        return Response
+                .serverError()
+                .build();
+    }
+
 }
