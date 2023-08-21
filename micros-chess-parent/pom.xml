@@ -27,6 +27,7 @@
     <jakartaee-api.version>10.0.0</jakartaee-api.version>
     <es-client.version>4.3.0</es-client.version>
     <commons-lang3.version>3.13.0</commons-lang3.version>
+    <micros-chess-common-test.version>1.0-SNAPSHOT</micros-chess-common-test.version>
     <junit.version>5.10.0</junit.version>
     <assertj.version>3.24.2</assertj.version>
     <mockito.version>5.4.0</mockito.version>
@@ -75,6 +76,12 @@
         <version>${junit.version}</version>
         <scope>import</scope>
         <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>io.github.marcodiri</groupId>
+        <artifactId>micros-chess-common-test</artifactId>
+        <version>${micros-chess-common-test.version}</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.assertj</groupId>
@@ -126,6 +133,7 @@
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-slf4j-impl</artifactId>
     </dependency>
+
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
@@ -140,7 +148,7 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
       <scope>test</scope>
-  </dependency>
+    </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
