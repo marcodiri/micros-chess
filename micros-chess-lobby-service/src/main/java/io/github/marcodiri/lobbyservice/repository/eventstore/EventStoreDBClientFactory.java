@@ -8,9 +8,12 @@ import jakarta.enterprise.inject.Produces;
 
 public class EventStoreDBClientFactory {
 
-    private static final String CONNECTION_STRING = "esdb://localhost:2113?tls=false";
+    // This is set to the name of the event store docker container
+    private static final String hostname = "eventstore";
+    private static final int port = 2113;
+    private static final String CONNECTION_STRING = String.format("esdb://%s:%s?tls=false", hostname, port);
 
-    EventStoreDBClientSettings setts = EventStoreDBConnectionString.parseOrThrow(CONNECTION_STRING);
+    private EventStoreDBClientSettings setts = EventStoreDBConnectionString.parseOrThrow(CONNECTION_STRING);
 
     @Produces
     public EventStoreDBClient createClient() {

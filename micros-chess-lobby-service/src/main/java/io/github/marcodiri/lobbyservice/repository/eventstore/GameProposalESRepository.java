@@ -94,7 +94,18 @@ public class GameProposalESRepository {
         return String.format("GameProposal_%s", gameProposalId);
     }
 
-    List<DomainEvent> readEventsForAggregate(UUID gameProposalId)
+    /**
+     * Read all events for given GameProposal id.
+     *
+     * @param gameProposalId
+     * @return a list of {@link DomainEvent}.
+     * @throws InterruptedException
+     * @throws ExecutionException
+     * @throws StreamReadException
+     * @throws DatabindException
+     * @throws IOException
+     */
+    public List<DomainEvent> readEventsForAggregate(UUID gameProposalId)
             throws InterruptedException, ExecutionException, StreamReadException, DatabindException, IOException {
         ReadStreamOptions readLastEvent = ReadStreamOptions.get()
                 .forwards()

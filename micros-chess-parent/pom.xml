@@ -37,7 +37,7 @@
     <awaitility.version>4.2.0</awaitility.version>
     <docker-maven.plugin.version>0.40.2</docker-maven.plugin.version>
 
-    <es.docker.version></es.docker.version>
+    <eventstore.hostname>eventstore</eventstore.hostname>
   </properties>
 
   <dependencyManagement>
@@ -185,11 +185,6 @@
         <plugin>
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>3.1.2</version>
-          <configuration>
-            <systemPropertyVariables>
-              <es.port>${es.mapped.port2}</es.port>
-            </systemPropertyVariables>
-          </configuration>
           <executions>
             <execution>
               <goals>
@@ -246,6 +241,7 @@
           <artifactId>docker-maven-plugin</artifactId>
           <version>${docker-maven.plugin.version}</version>
           <configuration>
+            <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
             <images>
               <image>
                 <name>wildfly:29-jdk17</name>
@@ -256,6 +252,11 @@
                   </tags>
                 </build>
                 <run>
+                  <network>
+                    <mode>custom</mode>
+                    <name>micros-chess-network</name>
+                    <alias>wildfly</alias>
+                  </network>
                   <ports>
                     <port>8080:8080</port>
                   </ports>
@@ -273,6 +274,11 @@
               <image>
                 <name>eventstore/eventstore:21.10.0-buster-slim</name>
                 <run>
+                  <network>
+                    <mode>custom</mode>
+                    <name>micros-chess-network</name>
+                    <alias>${eventstore.hostname}</alias>
+                  </network>
                   <ports>
                     <port>1113:1113</port>
                     <port>2113:2113</port>
