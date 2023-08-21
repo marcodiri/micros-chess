@@ -56,4 +56,26 @@ public class LobbyController {
                 .build();
     }
 
+    @POST
+    @Path("/cancel-game-proposal")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response cancelGameProposal(CancelGameProposalRequest request) {
+        LOGGER.info("Received CancelGameProposalRequest: {}", request);
+
+        try {
+            lobbyService.cancelGameProposal(request.getGameProposalId(), request.getCreatorId());
+            LOGGER.info("Sending OK");
+            return Response
+                    .ok()
+                    .build();
+        } catch (Exception e) {
+            LOGGER.catching(e);
+        }
+
+        return Response
+                .serverError()
+                .build();
+    }
+
 }

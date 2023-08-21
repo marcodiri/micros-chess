@@ -16,14 +16,19 @@ import java.util.concurrent.ExecutionException;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.databind.DatabindException;
+
 import io.github.marcodiri.lobbyservice.domain.GameProposalAggregate;
 import io.github.marcodiri.lobbyservice.domain.LobbyService;
+import io.github.marcodiri.lobbyservice.domain.UnsupportedStateTransitionException;
 import io.github.marcodiri.rest.InMemoryRestServer;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -66,41 +71,91 @@ public class LobbyControllerTest {
                 .body(equalTo("service is online"));
     }
 
-    @Test
-    void createGameProposalJSONResponse()
-            throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
-            NoSuchMethodException, SecurityException, InterruptedException, ExecutionException {
-        UUID gameProposalId = UUID.randomUUID();
-        when(gameProposal.getId()).thenReturn(gameProposalId);
-        when(lobbyService.createGameProposal(testPlayerId)).thenReturn(gameProposal);
-        RequestSpecification request = with()
-                .contentType(ContentType.JSON)
-                .body("{ \"creatorId\" : \"" + testPlayerId + "\" }");
+    @Nested
+    class CreateGameProposal {
 
-        Response post = request.post(server.target("/lobby/create-game-proposal").getUri());
-        ResponseBody<?> responseBody = post.getBody();
+        @Test
+        void JSONResponse()
+                throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+                NoSuchMethodException, SecurityException, InterruptedException, ExecutionException {
+            UUID gameProposalId = UUID.randomUUID();
+            when(gameProposal.getId()).thenReturn(gameProposalId);
+            when(lobbyService.createGameProposal(testPlayerId)).thenReturn(gameProposal);
+            RequestSpecification request = with()
+                    .contentType(ContentType.JSON)
+                    .body("{ \"creatorId\" : \"" + testPlayerId + "\" }");
 
-        verify(lobbyService).createGameProposal(testPlayerId);
-        post.then()
-                .assertThat()
-                .statusCode(equalTo(200))
-                .and()
-                .contentType(ContentType.JSON);
-        assertThat(responseBody.asString()).isEqualTo("{\"gameProposalId\":\"" + gameProposalId + "\"}");
+            Response post = request.post(server.target("/lobby/create-game-proposal").getUri());
+            ResponseBody<?> responseBody = post.getBody();
+
+            verify(lobbyService).createGameProposal(testPlayerId);
+            post.then()
+                    .assertThat()
+                    .statusCode(equalTo(200))
+                    .and()
+                    .contentType(ContentType.JSON);
+            assertThat(responseBody.asString()).isEqualTo("{\"gameProposalId\":\"" + gameProposalId + "\"}");
+        }
+
+        @Test
+        void internalErrorOnException() throws IllegalAccessException, IllegalArgumentException,
+        InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException, ExecutionException {
+            when(lobbyService.createGameProposal(any(UUID.class))).thenThrow(new IllegalArgumentException());
+
+            given()
+                    .contentType(ContentType.JSON)
+                    .body("{ \"creatorId\" : \"" + testPlayerId + "\" }")
+                    .when()
+                    .post(server.target("/lobby/create-game-proposal").getUri())
+                    .then()
+                    .assertThat()
+                    .statusCode(equalTo(500));
+        }
+
     }
 
-    @Test
-    void createGameProposalInternalErrorOnException() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException, ExecutionException {
-        when(lobbyService.createGameProposal(any(UUID.class))).thenThrow(new IllegalArgumentException());
+    @Nested
+    class CancelGameProposal {
 
-        given()
-                .contentType(ContentType.JSON)
-                .body("{ \"creatorId\" : \"" + testPlayerId + "\" }")
-                .when()
-                .post(server.target("/lobby/create-game-proposal").getUri())
-                .then()
-                .assertThat()
-                .statusCode(equalTo(500));
+        @Test
+        void OKResponse()
+                throws IllegalAccessException, IllegalArgumentException, InvocationTargetException,
+                NoSuchMethodException, SecurityException, InterruptedException, ExecutionException, StreamReadException,
+                DatabindException, IOException, UnsupportedStateTransitionException {
+            UUID gameProposalId = UUID.randomUUID();
+
+            given()
+                    .contentType(ContentType.JSON)
+                    .body("{ \"gameProposalId\" : \"" + gameProposalId + "\", \"creatorId\" : \"" + testPlayerId
+                            + "\" }")
+                    .when()
+                    .post(server.target("/lobby/cancel-game-proposal").getUri())
+                    .then()
+                    .assertThat()
+                    .statusCode(equalTo(200));
+
+            verify(lobbyService).cancelGameProposal(gameProposalId, testPlayerId);
+        }
+
+        @Test
+        void internalErrorOnException() throws IllegalAccessException, IllegalArgumentException,
+                InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
+                ExecutionException, StreamReadException, DatabindException, IOException,
+                UnsupportedStateTransitionException {
+            UUID gameProposalId = UUID.randomUUID();
+            when(lobbyService.cancelGameProposal(any(UUID.class), any(UUID.class)))
+                    .thenThrow(new IllegalArgumentException());
+
+            given()
+                    .contentType(ContentType.JSON)
+                    .body("{ \"gameProposalId\" : \"" + gameProposalId + "\", \"creatorId\" : \"" + testPlayerId
+                            + "\" }")
+                    .when()
+                    .post(server.target("/lobby/cancel-game-proposal").getUri())
+                    .then()
+                    .assertThat()
+                    .statusCode(equalTo(500));
+        }
     }
 
 }
