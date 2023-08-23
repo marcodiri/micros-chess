@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 
 import io.github.marcodiri.lobbyservice.domain.GameProposalAggregate;
+import io.github.marcodiri.lobbyservice.domain.GameProposalState;
 import io.github.marcodiri.lobbyservice.domain.LobbyService;
 import io.github.marcodiri.lobbyservice.domain.UnsupportedStateTransitionException;
 import io.github.marcodiri.rest.InMemoryRestServer;
@@ -138,6 +139,27 @@ public class LobbyControllerTest {
         }
 
         @Test
+        void badRequestOnUnsupportedStateTransitionException() throws IllegalAccessException, IllegalArgumentException,
+                InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
+                ExecutionException, StreamReadException, DatabindException, IOException,
+                UnsupportedStateTransitionException {
+            UUID gameProposalId = UUID.randomUUID();
+            when(lobbyService.cancelGameProposal(any(UUID.class), any(UUID.class)))
+                    .thenThrow(new UnsupportedStateTransitionException(GameProposalState.ACCEPTED,
+                            GameProposalState.CANCELED));
+
+            given()
+                    .contentType(ContentType.JSON)
+                    .body("{ \"gameProposalId\" : \"" + gameProposalId + "\", \"creatorId\" : \"" + testPlayerId
+                            + "\" }")
+                    .when()
+                    .post(server.target("/lobby/cancel-game-proposal").getUri())
+                    .then()
+                    .assertThat()
+                    .statusCode(equalTo(400));
+        }
+
+        @Test
         void internalErrorOnException() throws IllegalAccessException, IllegalArgumentException,
                 InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
                 ExecutionException, StreamReadException, DatabindException, IOException,
@@ -179,6 +201,27 @@ public class LobbyControllerTest {
                     .statusCode(equalTo(200));
 
             verify(lobbyService).acceptGameProposal(gameProposalId, testPlayerId);
+        }
+
+        @Test
+        void badRequestOnUnsupportedStateTransitionException() throws IllegalAccessException, IllegalArgumentException,
+                InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
+                ExecutionException, StreamReadException, DatabindException, IOException,
+                UnsupportedStateTransitionException {
+            UUID gameProposalId = UUID.randomUUID();
+            when(lobbyService.acceptGameProposal(any(UUID.class), any(UUID.class)))
+                    .thenThrow(new UnsupportedStateTransitionException(GameProposalState.CANCELED,
+                            GameProposalState.ACCEPTED));
+
+            given()
+                    .contentType(ContentType.JSON)
+                    .body("{ \"gameProposalId\" : \"" + gameProposalId + "\", \"acceptorId\" : \"" + testPlayerId
+                            + "\" }")
+                    .when()
+                    .post(server.target("/lobby/accept-game-proposal").getUri())
+                    .then()
+                    .assertThat()
+                    .statusCode(equalTo(400));
         }
 
         @Test

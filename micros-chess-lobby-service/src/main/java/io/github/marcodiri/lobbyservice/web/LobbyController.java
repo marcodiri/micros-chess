@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 
 import io.github.marcodiri.lobbyservice.domain.GameProposalAggregate;
 import io.github.marcodiri.lobbyservice.domain.LobbyService;
+import io.github.marcodiri.lobbyservice.domain.UnsupportedStateTransitionException;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -69,6 +70,11 @@ public class LobbyController {
             return Response
                     .ok()
                     .build();
+        } catch (UnsupportedStateTransitionException e) {
+            LOGGER.catching(e);
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .build();
         } catch (Exception e) {
             LOGGER.catching(e);
         }
@@ -90,6 +96,11 @@ public class LobbyController {
             LOGGER.info("Sending OK");
             return Response
                     .ok()
+                    .build();
+        } catch (UnsupportedStateTransitionException e) {
+            LOGGER.catching(e);
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
                     .build();
         } catch (Exception e) {
             LOGGER.catching(e);
