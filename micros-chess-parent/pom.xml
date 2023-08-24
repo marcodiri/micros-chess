@@ -17,6 +17,7 @@
     <module>../micros-chess-common-test</module>
     <module>../micros-chess-lobby-service-api</module>
     <module>../micros-chess-lobby-service</module>
+    <module>../micros-chess-game-service-api</module>
     <module>../micros-chess-game-service</module>
   </modules>
 
