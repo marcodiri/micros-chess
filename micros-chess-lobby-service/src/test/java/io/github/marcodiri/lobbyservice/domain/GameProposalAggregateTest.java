@@ -27,14 +27,14 @@ import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand
 @ExtendWith(MockitoExtension.class)
 public class GameProposalAggregateTest {
 
+    @Spy
+    private GameProposalAggregate gameProposal;
+
     @Nested
     class processCreateGameProposal {
 
         private UUID gameProposalId, creatorId;
         private CreateGameProposalCommand cmd;
-
-        @Spy
-        private GameProposalAggregate gameProposal;
 
         @BeforeEach
         void createCommand() {
@@ -61,9 +61,6 @@ public class GameProposalAggregateTest {
 
         private UUID gameProposalId, creatorId;
         private CancelGameProposalCommand cmd;
-
-        @Spy
-        private GameProposalAggregate gameProposal;
 
         @BeforeEach
         void createCommand() {
@@ -105,9 +102,6 @@ public class GameProposalAggregateTest {
 
         private UUID gameProposalId, creatorId, acceptorId;
         private AcceptGameProposalCommand cmd;
-
-        @Spy
-        private GameProposalAggregate gameProposal;
 
         @BeforeEach
         void createCommand() {
@@ -152,9 +146,6 @@ public class GameProposalAggregateTest {
         private UUID gameProposalId, creatorId;
         private GameProposalCreated event;
 
-        @Spy
-        private GameProposalAggregate gameProposal;
-
         @BeforeEach
         void createCommand() {
             gameProposalId = UUID.randomUUID();
@@ -179,9 +170,6 @@ public class GameProposalAggregateTest {
         private UUID gameProposalId;
         private GameProposalCanceled event;
 
-        @Spy
-        private GameProposalAggregate gameProposal;
-
         @BeforeEach
         void createCommand() {
             gameProposalId = UUID.randomUUID();
@@ -202,9 +190,6 @@ public class GameProposalAggregateTest {
 
         private UUID gameProposalId, creatorId, acceptorId;
         private GameProposalAccepted event;
-
-        @Spy
-        private GameProposalAggregate gameProposal;
 
         @BeforeEach
         void createCommand() {
