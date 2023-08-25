@@ -59,7 +59,7 @@ public class GameAggregateTest {
     }
 
     @Nested
-    class processCancelGame {
+    class processPlayMove {
 
         private UUID gameId, playerId;
         private PlayMoveCommand cmd;

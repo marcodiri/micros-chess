@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import io.github.marcodiri.core.domain.Aggregate;
 import io.github.marcodiri.core.domain.event.DomainEvent;
@@ -18,23 +16,12 @@ import io.github.marcodiri.gameservice.domain.command.PlayMoveCommand;
 
 public class GameAggregate extends Aggregate {
 
-    private UUID id;
     private UUID player1Id;
     private UUID player2Id;
     private List<ImmutablePair<UUID, String>> movesList;
     private GameState state;
 
-    private static final Logger LOGGER = LogManager.getLogger(GameAggregate.class);
-
     public GameAggregate() {
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    UUID generateId() {
-        return UUID.randomUUID();
     }
 
     UUID getPlayer1Id() {

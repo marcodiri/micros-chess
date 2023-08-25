@@ -4,9 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import io.github.marcodiri.core.domain.Aggregate;
 import io.github.marcodiri.core.domain.event.DomainEvent;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
@@ -18,22 +15,11 @@ import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand
 
 public class GameProposalAggregate extends Aggregate {
 
-    private UUID id;
     private UUID creatorId;
     private UUID acceptorId;
     private GameProposalState state;
 
-    private static final Logger LOGGER = LogManager.getLogger(GameProposalAggregate.class);
-
     public GameProposalAggregate() {
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    UUID generateId() {
-        return UUID.randomUUID();
     }
 
     UUID getCreatorId() {
