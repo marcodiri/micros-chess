@@ -1,10 +1,11 @@
 package io.github.marcodiri.lobbyservice.domain;
 
-import java.util.List;
-import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doReturn;
+
+import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -46,7 +47,7 @@ public class GameProposalAggregateTest {
         @Test
         void processReturnsEventsForCreation() {
             GameProposalCreated expectedEvent = new GameProposalCreated(gameProposalId, creatorId);
-            when(gameProposal.generateId()).thenReturn(gameProposalId);
+            doReturn(gameProposalId).when(gameProposal).generateId();
 
             List<DomainEvent> events = gameProposal.process(cmd);
 
@@ -72,8 +73,8 @@ public class GameProposalAggregateTest {
         @Test
         void processReturnsEventsForCancellation() throws UnsupportedStateTransitionException {
             GameProposalCanceled expectedEvent = new GameProposalCanceled(gameProposalId);
-            when(gameProposal.getId()).thenReturn(gameProposalId);
-            when(gameProposal.getState()).thenReturn(GameProposalState.PENDING);
+            doReturn(gameProposalId).when(gameProposal).getId();
+            doReturn(GameProposalState.PENDING).when(gameProposal).getState();
 
             List<DomainEvent> events = gameProposal.process(cmd);
 
@@ -83,16 +84,13 @@ public class GameProposalAggregateTest {
 
         @ParameterizedTest
         @NullSource
-        @EnumSource(
-        value = GameProposalState.class,
-        names = {"PENDING"},
-        mode = EnumSource.Mode.EXCLUDE)
+        @EnumSource(value = GameProposalState.class, names = { "PENDING" }, mode = EnumSource.Mode.EXCLUDE)
         void processThrowsIfGameProposalIsNotInCorrectState(GameProposalState state) {
-            when(gameProposal.getState()).thenReturn(state);
+            doReturn(state).when(gameProposal).getState();
 
             assertThatThrownBy(() -> gameProposal.process(cmd))
-                .isInstanceOf(UnsupportedStateTransitionException.class)
-                .hasMessage("Cannot transition from %s to %s", state, GameProposalState.CANCELED);
+                    .isInstanceOf(UnsupportedStateTransitionException.class)
+                    .hasMessage("Cannot transition from %s to %s", state, GameProposalState.CANCELED);
         }
 
     }
@@ -114,9 +112,9 @@ public class GameProposalAggregateTest {
         @Test
         void processReturnsEventsForAcceptation() throws UnsupportedStateTransitionException {
             GameProposalAccepted expectedEvent = new GameProposalAccepted(gameProposalId, creatorId, acceptorId);
-            when(gameProposal.getId()).thenReturn(gameProposalId);
-            when(gameProposal.getCreatorId()).thenReturn(creatorId);
-            when(gameProposal.getState()).thenReturn(GameProposalState.PENDING);
+            doReturn(gameProposalId).when(gameProposal).getId();
+            doReturn(creatorId).when(gameProposal).getCreatorId();
+            doReturn(GameProposalState.PENDING).when(gameProposal).getState();
 
             List<DomainEvent> events = gameProposal.process(cmd);
 
@@ -126,16 +124,13 @@ public class GameProposalAggregateTest {
 
         @ParameterizedTest
         @NullSource
-        @EnumSource(
-        value = GameProposalState.class,
-        names = {"PENDING"},
-        mode = EnumSource.Mode.EXCLUDE)
+        @EnumSource(value = GameProposalState.class, names = { "PENDING" }, mode = EnumSource.Mode.EXCLUDE)
         void processThrowsIfGameProposalIsNotInCorrectState(GameProposalState state) {
-            when(gameProposal.getState()).thenReturn(state);
+            doReturn(state).when(gameProposal).getState();
 
             assertThatThrownBy(() -> gameProposal.process(cmd))
-                .isInstanceOf(UnsupportedStateTransitionException.class)
-                .hasMessage("Cannot transition from %s to %s", state, GameProposalState.ACCEPTED);
+                    .isInstanceOf(UnsupportedStateTransitionException.class)
+                    .hasMessage("Cannot transition from %s to %s", state, GameProposalState.ACCEPTED);
         }
 
     }

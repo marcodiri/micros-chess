@@ -2,7 +2,7 @@ package io.github.marcodiri.gameservice.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doReturn;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,7 @@ public class GameAggregateTest {
         @Test
         void processReturnsEventsForCreation() {
             GameCreated expectedEvent = new GameCreated(gameId, player1Id, player2Id);
-            when(game.generateId()).thenReturn(gameId);
+            doReturn(gameId).when(game).generateId();
 
             List<DomainEvent> events = game.process(cmd);
 
@@ -75,8 +75,8 @@ public class GameAggregateTest {
         @Test
         void processReturnsEventsForPlayingMove() throws GameNotInProgressException, IllegalMoveException {
             MovePlayed expectedEvent = new MovePlayed(gameId, playerId, move);
-            when(game.getId()).thenReturn(gameId);
-            when(game.getState()).thenReturn(GameState.IN_PROGRESS);
+            doReturn(gameId).when(game).getId();
+            doReturn(GameState.IN_PROGRESS).when(game).getState();
 
             List<DomainEvent> events = game.process(cmd);
 
@@ -86,28 +86,23 @@ public class GameAggregateTest {
 
         @ParameterizedTest
         @NullSource
-        @EnumSource(
-        value = GameState.class,
-        names = {"IN_PROGRESS"},
-        mode = EnumSource.Mode.EXCLUDE)
-        void processThrowsIfGameIsNotInCorrectState(GameState state)
-        {
-            when(game.getState()).thenReturn(state);
+        @EnumSource(value = GameState.class, names = { "IN_PROGRESS" }, mode = EnumSource.Mode.EXCLUDE)
+        void processThrowsIfGameIsNotInCorrectState(GameState state) {
+            doReturn(state).when(game).getState();
 
             assertThatThrownBy(() -> game.process(cmd))
-                .isInstanceOf(GameNotInProgressException.class)
-                .hasMessage("Move cannot be played because the game is in state %s", state);
+                    .isInstanceOf(GameNotInProgressException.class)
+                    .hasMessage("Move cannot be played because the game is in state %s", state);
         }
 
         @Test
-        void processThrowsIfMoveIsIllegal()
-        {
-            when(game.getState()).thenReturn(GameState.IN_PROGRESS);
-            when(game.moveIsLegal()).thenReturn(false);
+        void processThrowsIfMoveIsIllegal() {
+            doReturn(GameState.IN_PROGRESS).when(game).getState();
+            doReturn(false).when(game).moveIsLegal();
 
             assertThatThrownBy(() -> game.process(cmd))
-                .isInstanceOf(IllegalMoveException.class)
-                .hasMessage("Move %s is illegal for the current position", move);
+                    .isInstanceOf(IllegalMoveException.class)
+                    .hasMessage("Move %s is illegal for the current position", move);
         }
 
     }
@@ -158,7 +153,7 @@ public class GameAggregateTest {
 
         @Test
         void applyMovePlayedAppendsMoveToMovesList() {
-            when(game.getMovesList()).thenReturn(new ArrayList<>());
+            doReturn(new ArrayList<>()).when(game).getMovesList();
 
             game.apply(event1);
             game.apply(event2);
