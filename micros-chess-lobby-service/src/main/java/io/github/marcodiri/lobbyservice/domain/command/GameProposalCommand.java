@@ -2,7 +2,9 @@ package io.github.marcodiri.lobbyservice.domain.command;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public abstract class GameProposalCommand {
+import io.github.marcodiri.core.domain.command.Command;
+
+public abstract class GameProposalCommand implements Command {
 
     @Override
     public String toString() {

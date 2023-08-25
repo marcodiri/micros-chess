@@ -4,10 +4,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import io.github.marcodiri.core.domain.Aggregate;
 import io.github.marcodiri.core.domain.event.DomainEvent;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCanceled;
@@ -16,7 +16,7 @@ import io.github.marcodiri.lobbyservice.domain.command.AcceptGameProposalCommand
 import io.github.marcodiri.lobbyservice.domain.command.CancelGameProposalCommand;
 import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand;
 
-public class GameProposalAggregate {
+public class GameProposalAggregate extends Aggregate {
 
     private UUID id;
     private UUID creatorId;
@@ -46,11 +46,6 @@ public class GameProposalAggregate {
 
     GameProposalState getState() {
         return state;
-    }
-
-    @Override
-    public String toString() {
-        return ToStringBuilder.reflectionToString(this);
     }
 
     public List<DomainEvent> process(CreateGameProposalCommand command) {

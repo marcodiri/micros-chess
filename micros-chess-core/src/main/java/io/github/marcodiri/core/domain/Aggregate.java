@@ -1,10 +1,8 @@
-package io.github.marcodiri.gameservice.domain.command;
+package io.github.marcodiri.core.domain;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import io.github.marcodiri.core.domain.command.Command;
-
-public abstract class GameCommand implements Command {
+public abstract class Aggregate {
 
     @Override
     public String toString() {
