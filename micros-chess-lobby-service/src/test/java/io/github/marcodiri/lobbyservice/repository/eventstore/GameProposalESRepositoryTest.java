@@ -89,7 +89,6 @@ public class GameProposalESRepositoryTest {
         void saveCreatesNewGameProposal() throws IllegalAccessException, IllegalArgumentException,
                 InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
                 ExecutionException {
-
             gameProposalESRepository.save(cmd);
 
             verify(gameProposalFactory).createAggregate();
@@ -99,14 +98,14 @@ public class GameProposalESRepositoryTest {
         void saveCallsProcessAndApplyAndWriteEvents() throws IllegalAccessException, IllegalArgumentException,
                 InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
                 ExecutionException {
-            List<DomainEvent> events = Arrays.asList(new GameProposalCreated(UUID.randomUUID(), UUID.randomUUID()),
+            List<DomainEvent> events = Arrays.asList(
+                    new GameProposalCreated(UUID.randomUUID(), UUID.randomUUID()),
                     new GameProposalCanceled(UUID.randomUUID()));
             when(gameProposal.process(isA(CreateGameProposalCommand.class))).thenReturn(events);
 
             gameProposalESRepository.save(cmd);
 
-            InOrder inOrder = inOrder(gameProposal);
-            inOrder.verify(gameProposal).process(cmd);
+            verify(gameProposal).process(cmd);
             verify(gameProposalESRepository).applyAndWriteEvents(gameProposal, events);
         }
 
@@ -140,7 +139,8 @@ public class GameProposalESRepositoryTest {
                 InterruptedException,
                 ExecutionException, StreamReadException, DatabindException, IOException,
                 UnsupportedStateTransitionException {
-            List<DomainEvent> events = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
+            List<DomainEvent> events = Arrays.asList(
+                    new GameProposalCreated(gameProposalId, UUID.randomUUID()),
                     new GameProposalCanceled(gameProposalId));
             doReturn(events).when(gameProposalESRepository).readEventsForAggregate(gameProposalId);
 
@@ -157,7 +157,8 @@ public class GameProposalESRepositoryTest {
                 throws StreamReadException, DatabindException, IllegalAccessException, InvocationTargetException,
                 NoSuchMethodException, InterruptedException, ExecutionException, IOException,
                 UnsupportedStateTransitionException {
-            List<DomainEvent> newEvents = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
+            List<DomainEvent> newEvents = Arrays.asList(
+                    new GameProposalCreated(gameProposalId, UUID.randomUUID()),
                     new GameProposalCreated(gameProposalId, UUID.randomUUID()));
             when(gameProposal.process(isA(CancelGameProposalCommand.class))).thenReturn(newEvents);
 
@@ -197,7 +198,8 @@ public class GameProposalESRepositoryTest {
                 InterruptedException,
                 ExecutionException, StreamReadException, DatabindException, IOException,
                 UnsupportedStateTransitionException {
-            List<DomainEvent> events = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
+            List<DomainEvent> events = Arrays.asList(
+                    new GameProposalCreated(gameProposalId, UUID.randomUUID()),
                     new GameProposalCanceled(gameProposalId));
             doReturn(events).when(gameProposalESRepository).readEventsForAggregate(gameProposalId);
 
@@ -214,7 +216,8 @@ public class GameProposalESRepositoryTest {
                 throws StreamReadException, DatabindException, IllegalAccessException, InvocationTargetException,
                 NoSuchMethodException, InterruptedException, ExecutionException, IOException,
                 UnsupportedStateTransitionException {
-            List<DomainEvent> newEvents = Arrays.asList(new GameProposalCreated(gameProposalId, UUID.randomUUID()),
+            List<DomainEvent> newEvents = Arrays.asList(
+                    new GameProposalCreated(gameProposalId, UUID.randomUUID()),
                     new GameProposalCreated(gameProposalId, UUID.randomUUID()));
             when(gameProposal.process(isA(AcceptGameProposalCommand.class))).thenReturn(newEvents);
 

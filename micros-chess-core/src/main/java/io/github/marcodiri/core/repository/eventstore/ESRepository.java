@@ -28,7 +28,7 @@ public abstract class ESRepository {
     protected final EventStoreDBClient client;
     protected final AggregateFactory aggregateFactory;
 
-    private static final Logger LOGGER = LogManager.getLogger(ESRepository.class);
+    protected static final Logger LOGGER = LogManager.getLogger(ESRepository.class);
 
     public ESRepository(final EventStoreDBClient client, final AggregateFactory aggregateFactory) {
         this.client = client;

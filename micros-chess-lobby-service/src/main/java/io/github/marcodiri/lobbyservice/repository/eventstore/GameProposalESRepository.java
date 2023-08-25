@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.eventstore.dbclient.EventStoreDBClient;
 import com.eventstore.dbclient.RecordedEvent;
 import com.eventstore.dbclient.ResolvedEvent;
@@ -29,8 +26,6 @@ import io.github.marcodiri.lobbyservice.domain.command.CreateGameProposalCommand
 import jakarta.inject.Inject;
 
 public class GameProposalESRepository extends ESRepository {
-
-    private static final Logger LOGGER = LogManager.getLogger(GameProposalESRepository.class);
 
     @Inject
     public GameProposalESRepository(final EventStoreDBClient client, final GameProposalFactory gameProposalFactory) {

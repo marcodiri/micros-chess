@@ -77,34 +77,6 @@
           <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
           <images>
             <image>
-              <name>wildfly:29-jdk17</name>
-              <build>
-                <dockerFile>${project.basedir}/wildfly.Dockerfile</dockerFile>
-                <tags>
-                  <tag>latest</tag>
-                </tags>
-              </build>
-              <run>
-                <network>
-                  <mode>custom</mode>
-                  <name>micros-chess-network</name>
-                  <alias>wildfly</alias>
-                </network>
-                <ports>
-                  <port>8080:8080</port>
-                </ports>
-                <wait>
-                  <http>
-                    <url>http://localhost:8080</url>
-                    <method>GET</method>
-                    <status>200</status>
-                  </http>
-                  <!-- <log>listening on 0.0.0.0:8080</log> -->
-                  <time>15000</time>
-                </wait>
-              </run>
-            </image>
-            <image>
               <name>eventstore/eventstore:21.10.0-buster-slim</name>
               <run>
                 <network>
@@ -134,6 +106,34 @@
                   </http>
                   <!-- <log>\[\"0.0.0.0:2113\"\] IS LEADER</log> -->
                   <time>10000</time>
+                </wait>
+              </run>
+            </image>
+            <image>
+              <name>wildfly:29-jdk17</name>
+              <build>
+                <dockerFile>${project.basedir}/wildfly.Dockerfile</dockerFile>
+                <tags>
+                  <tag>latest</tag>
+                </tags>
+              </build>
+              <run>
+                <network>
+                  <mode>custom</mode>
+                  <name>micros-chess-network</name>
+                  <alias>wildfly</alias>
+                </network>
+                <ports>
+                  <port>8080:8080</port>
+                </ports>
+                <wait>
+                  <http>
+                    <url>http://localhost:8080</url>
+                    <method>GET</method>
+                    <status>200</status>
+                  </http>
+                  <!-- <log>listening on 0.0.0.0:8080</log> -->
+                  <time>15000</time>
                 </wait>
               </run>
             </image>
