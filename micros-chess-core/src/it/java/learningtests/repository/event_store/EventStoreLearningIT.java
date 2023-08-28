@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -60,9 +61,14 @@ class EventStoreLearningIT {
     private static EventStoreDBClient client;
 
     @BeforeAll
-    static void setup() {
+    static void setupClient() {
         setts = EventStoreDBConnectionString.parseOrThrow("esdb://localhost:2113?tls=false");
         client = EventStoreDBClient.create(setts);
+    }
+
+    @AfterAll
+    static void teardownClient() throws ExecutionException, InterruptedException {
+        client.shutdown();
     }
 
     @Nested
