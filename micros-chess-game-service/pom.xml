@@ -14,13 +14,9 @@
 
   <artifactId>micros-chess-game-service</artifactId>
   <version>1.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+  <packaging>war</packaging>
 
   <name>micros-chess-game-service</name>
-
-  <properties>
-    <spring-boot.version>3.1.2</spring-boot.version>
-  </properties>
 
   <dependencyManagement>
     <dependencies>
@@ -39,11 +35,6 @@
         <artifactId>micros-chess-game-service-api</artifactId>
         <version>1.0-SNAPSHOT</version>
       </dependency>
-      <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-websocket</artifactId>
-        <version>${spring-boot.version}</version>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -61,20 +52,21 @@
       <artifactId>micros-chess-game-service-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-websocket</artifactId>
-      <version>${spring-boot.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-starter-logging</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>jakarta.platform</groupId>
+      <artifactId>jakarta.jakartaee-api</artifactId>
     </dependency>
 
     <dependency>
+      <groupId>io.github.marcodiri</groupId>
+      <artifactId>micros-chess-common-test</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
     </dependency>
     <dependency>
       <groupId>org.awaitility</groupId>
@@ -127,6 +119,34 @@
                   </http>
                   <!-- <log>\[\"0.0.0.0:2113\"\] IS LEADER</log> -->
                   <time>10000</time>
+                </wait>
+              </run>
+            </image>
+            <image>
+              <name>wildfly:29-jdk17</name>
+              <build>
+                <dockerFile>${project.basedir}/wildfly.Dockerfile</dockerFile>
+                <tags>
+                  <tag>latest</tag>
+                </tags>
+              </build>
+              <run>
+                <network>
+                  <mode>custom</mode>
+                  <name>micros-chess-network</name>
+                  <alias>wildfly</alias>
+                </network>
+                <ports>
+                  <port>8080:8080</port>
+                </ports>
+                <wait>
+                  <http>
+                    <url>http://localhost:8080</url>
+                    <method>GET</method>
+                    <status>200</status>
+                  </http>
+                  <!-- <log>listening on 0.0.0.0:8080</log> -->
+                  <time>15000</time>
                 </wait>
               </run>
             </image>
