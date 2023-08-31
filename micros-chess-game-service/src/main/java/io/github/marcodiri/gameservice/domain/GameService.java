@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.DatabindException;
 import io.github.marcodiri.gameservice.domain.command.CreateGameCommand;
 import io.github.marcodiri.gameservice.domain.command.PlayMoveCommand;
 import io.github.marcodiri.gameservice.repository.eventstore.GameESRepository;
+import jakarta.inject.Inject;
 
 public class GameService {
 
@@ -21,6 +22,7 @@ public class GameService {
 
     private static final Logger LOGGER = LogManager.getLogger(GameService.class);
 
+    @Inject
     public GameService(final GameESRepository gameESRepository) {
         this.gameESRepository = gameESRepository;
     }

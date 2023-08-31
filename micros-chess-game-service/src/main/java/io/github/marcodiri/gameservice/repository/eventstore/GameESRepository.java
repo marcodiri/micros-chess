@@ -23,9 +23,11 @@ import io.github.marcodiri.gameservice.domain.GameNotInProgressException;
 import io.github.marcodiri.gameservice.domain.IllegalMoveException;
 import io.github.marcodiri.gameservice.domain.command.CreateGameCommand;
 import io.github.marcodiri.gameservice.domain.command.PlayMoveCommand;
+import jakarta.inject.Inject;
 
 public class GameESRepository extends ESRepository {
 
+    @Inject
     public GameESRepository(final EventStoreDBClient client, final GameFactory gameFactory) {
         super(client, gameFactory);
     }
