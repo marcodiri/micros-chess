@@ -1,4 +1,4 @@
-package io.github.marcodiri.gameservice.eventhandler;
+package io.marcodiri.github.webservice.eventhandler;
 
 import java.util.concurrent.ExecutionException;
 
@@ -13,7 +13,6 @@ import com.eventstore.dbclient.Subscription;
 import com.eventstore.dbclient.SubscriptionListener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.github.marcodiri.gameservice.domain.GameService;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalEventType;
 
@@ -22,8 +21,6 @@ public class GameESEventHandler implements AutoCloseable {
     private static final Logger LOGGER = LogManager.getLogger(GameESEventHandler.class);
 
     private EventStoreDBClient client;
-    // Injected singleton
-    private GameService gameService;
 
     private abstract class GameESListener extends SubscriptionListener {
 
@@ -47,9 +44,8 @@ public class GameESEventHandler implements AutoCloseable {
 
     };
 
-    public GameESEventHandler(EventStoreDBClient client, GameService gameService) {
+    public GameESEventHandler(EventStoreDBClient client) {
         this.client = client;
-        this.gameService = gameService;
 
         SubscribeToStreamOptions options = SubscribeToStreamOptions.get()
                 .fromStart()
@@ -68,9 +64,9 @@ public class GameESEventHandler implements AutoCloseable {
                             GameProposalAccepted gameProposalAcceptedEvent = new ObjectMapper().readValue(
                                     originalEvent.getEventData(),
                                     GameProposalAccepted.class);
-                            gameService.createGame(
-                                    gameProposalAcceptedEvent.getCreatorId(),
-                                    gameProposalAcceptedEvent.getAcceptorId());
+                            // gameService.createGame(
+                            //         gameProposalAcceptedEvent.getCreatorId(),
+                            //         gameProposalAcceptedEvent.getAcceptorId());
                         } catch (Exception e) {
                             LOGGER.error(e.getMessage());
                         }
