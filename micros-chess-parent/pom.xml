@@ -19,6 +19,7 @@
     <module>../micros-chess-lobby-service</module>
     <module>../micros-chess-game-service-api</module>
     <module>../micros-chess-game-service</module>
+    <module>../micros-chess-web-service</module>
   </modules>
 
   <properties>

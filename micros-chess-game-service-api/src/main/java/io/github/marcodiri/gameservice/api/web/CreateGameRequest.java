@@ -1,5 +1,6 @@
-package io.github.marcodiri.gameservice.web;
+package io.github.marcodiri.gameservice.api.web;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -36,6 +37,17 @@ public class CreateGameRequest {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        CreateGameRequest request = (CreateGameRequest) o;
+        return Objects.equals(player1Id, request.player1Id)
+                && Objects.equals(player2Id, request.player2Id);
     }
 
 }

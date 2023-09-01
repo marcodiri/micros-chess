@@ -18,6 +18,8 @@ import com.fasterxml.jackson.databind.DatabindException;
 
 import io.github.marcodiri.core.domain.event.DomainEvent;
 import io.github.marcodiri.gameservice.api.event.GameCreated;
+import io.github.marcodiri.gameservice.api.web.CreateGameResponse;
+import io.github.marcodiri.gameservice.api.web.PlayMoveRequest;
 import io.github.marcodiri.gameservice.domain.GameFactory;
 import io.github.marcodiri.gameservice.repository.eventstore.EventStoreDBClientFactory;
 import io.github.marcodiri.gameservice.repository.eventstore.GameESRepository;

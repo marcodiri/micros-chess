@@ -4,6 +4,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.eventstore.dbclient.EventStoreDBClient;
 import com.eventstore.dbclient.RecordedEvent;
@@ -13,14 +15,17 @@ import com.eventstore.dbclient.Subscription;
 import com.eventstore.dbclient.SubscriptionListener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.github.marcodiri.gameservice.api.web.CreateGameRequest;
+import io.github.marcodiri.gameservice.api.web.CreateGameResponse;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalEventType;
 
-public class GameESEventHandler implements AutoCloseable {
+public class ESEventHandler implements AutoCloseable {
 
-    private static final Logger LOGGER = LogManager.getLogger(GameESEventHandler.class);
+    private static final Logger LOGGER = LogManager.getLogger(ESEventHandler.class);
 
-    private EventStoreDBClient client;
+    private final EventStoreDBClient clientES;
+    private final WebClient clientHttp;
 
     private abstract class GameESListener extends SubscriptionListener {
 
@@ -44,14 +49,15 @@ public class GameESEventHandler implements AutoCloseable {
 
     };
 
-    public GameESEventHandler(EventStoreDBClient client) {
-        this.client = client;
+    public ESEventHandler(final EventStoreDBClient clientES, final WebClient clientHttp) {
+        this.clientES = clientES;
+        this.clientHttp = clientHttp;
 
         SubscribeToStreamOptions options = SubscribeToStreamOptions.get()
                 .fromStart()
                 .resolveLinkTos();
 
-        client.subscribeToStream(
+        clientES.subscribeToStream(
                 "$et-" + GameProposalEventType.ACCEPTED.toString(),
                 new GameESListener() {
                     @Override
@@ -64,9 +70,21 @@ public class GameESEventHandler implements AutoCloseable {
                             GameProposalAccepted gameProposalAcceptedEvent = new ObjectMapper().readValue(
                                     originalEvent.getEventData(),
                                     GameProposalAccepted.class);
-                            // gameService.createGame(
-                            //         gameProposalAcceptedEvent.getCreatorId(),
-                            //         gameProposalAcceptedEvent.getAcceptorId());
+
+                            CreateGameRequest createGameRequest = new CreateGameRequest(
+                                    gameProposalAcceptedEvent.getCreatorId(),
+                                    gameProposalAcceptedEvent.getAcceptorId());
+                            LOGGER.info("POSTing to endpoint /game/create-game " + createGameRequest);
+
+                            CreateGameResponse response = clientHttp.post()
+                                    .uri("/game/create-game")
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .accept(MediaType.APPLICATION_JSON)
+                                    .bodyValue(createGameRequest)
+                                    .retrieve()
+                                    .bodyToMono(CreateGameResponse.class)
+                                    .block();
+                            LOGGER.info("Received response " + response);
                         } catch (Exception e) {
                             LOGGER.error(e.getMessage());
                         }
@@ -77,12 +95,12 @@ public class GameESEventHandler implements AutoCloseable {
 
     @Override
     public void close() throws ExecutionException, InterruptedException {
-        client.shutdown();
+        clientES.shutdown();
     }
 
     @Override
     protected void finalize() throws Throwable {
-        if (!client.isShutdown()) {
+        if (!clientES.isShutdown()) {
             LOGGER.warn("Client is not shut down");
         }
     }

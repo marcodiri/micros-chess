@@ -10,66 +10,87 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.eventstore.dbclient.EventData;
 import com.eventstore.dbclient.EventStoreDBClient;
 import com.eventstore.dbclient.EventStoreDBClientSettings;
 import com.eventstore.dbclient.EventStoreDBConnectionString;
 
+import io.github.marcodiri.gameservice.api.web.CreateGameRequest;
+import io.github.marcodiri.gameservice.api.web.CreateGameResponse;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
 import io.github.marcodiri.rest.InMemoryRestServer;
-import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-public class GameESListenerIT {
+@ExtendWith(MockitoExtension.class)
+public class ESEventHandlerIT {
 
-    GameESEventHandler gameESListener;
+    ESEventHandler eventHandler;
 
     private static EventStoreDBClientSettings setts;
     private static EventStoreDBClient readerClient, writerClient;
+    private static WebClient httpClient;
 
     private static InMemoryRestServer server;
 
-    @Path("/resource")
+    private static UUID gameId = UUID.randomUUID();
+
+    @Path("/game")
     public static class MyResource {
 
-        @GET
-        @Path("/method")
-        public Response method() {
-            System.out.println("called method");
+        @POST
+        @Path("/create-game")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        public Response method(CreateGameRequest request) {
+            CreateGameResponse response = new CreateGameResponse(gameId);
             return Response
                     .ok()
-                    .entity("service is online")
+                    .entity(response)
                     .build();
         }
 
     }
 
+    @Spy
+    MyResource myResource = new MyResource();
+
     @BeforeAll
-    static void setupClient() throws IOException {
+    static void setupClient() {
         setts = EventStoreDBConnectionString.parseOrThrow("esdb://localhost:2113?tls=false");
         readerClient = EventStoreDBClient.create(setts);
         writerClient = EventStoreDBClient.create(setts);
-
-        server = InMemoryRestServer.create(MyResource.class);
     }
 
     @AfterAll
     static void teardownClient() throws ExecutionException, InterruptedException {
-        readerClient.shutdown();
         writerClient.shutdown();
+        readerClient.shutdown();
     }
 
     @BeforeEach
-    void setupListener() {
-        gameESListener = new GameESEventHandler(readerClient);
+    void setup() throws IOException {
+        server = InMemoryRestServer.create(myResource);
+        httpClient = WebClient.create(server.target().getUri().toString());
+        eventHandler = new ESEventHandler(readerClient, httpClient);
+    }
+
+    @AfterEach
+    void closeServer() {
+        server.close();
     }
 
     @Test
@@ -79,6 +100,7 @@ public class GameESListenerIT {
         UUID gameProposalId = UUID.randomUUID();
         UUID player1Id = UUID.randomUUID();
         UUID player2Id = UUID.randomUUID();
+        CreateGameRequest expectedRequest = new CreateGameRequest(player1Id, player2Id);
         GameProposalAccepted event = new GameProposalAccepted(gameProposalId, player1Id, player2Id);
         EventData eventData = EventData
                 .builderAsJson(event.getType().toString(), event)
@@ -89,8 +111,8 @@ public class GameESListenerIT {
                 .appendToStream(streamName, eventData)
                 .get();
 
-        // await().atMost(2, SECONDS).untilAsserted(() ->
-        // verify(gameService).createGame(player1Id, player2Id));
+        await().atMost(2, SECONDS).untilAsserted(() ->
+        verify(myResource).method(expectedRequest));
     }
 
 }

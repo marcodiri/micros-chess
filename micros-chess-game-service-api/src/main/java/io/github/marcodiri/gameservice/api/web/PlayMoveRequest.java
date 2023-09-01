@@ -1,4 +1,4 @@
-package io.github.marcodiri.gameservice.web;
+package io.github.marcodiri.gameservice.api.web;
 
 import java.util.UUID;
 

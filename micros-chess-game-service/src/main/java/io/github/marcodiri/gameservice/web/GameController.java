@@ -3,6 +3,9 @@ package io.github.marcodiri.gameservice.web;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import io.github.marcodiri.gameservice.api.web.CreateGameRequest;
+import io.github.marcodiri.gameservice.api.web.CreateGameResponse;
+import io.github.marcodiri.gameservice.api.web.PlayMoveRequest;
 import io.github.marcodiri.gameservice.domain.GameAggregate;
 import io.github.marcodiri.gameservice.domain.GameNotInProgressException;
 import io.github.marcodiri.gameservice.domain.GameService;
