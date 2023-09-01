@@ -1,4 +1,4 @@
-package io.marcodiri.github.webservice.eventhandler;
+package io.github.marcodiri.webservice.eventhandler;
 
 import java.util.concurrent.ExecutionException;
 

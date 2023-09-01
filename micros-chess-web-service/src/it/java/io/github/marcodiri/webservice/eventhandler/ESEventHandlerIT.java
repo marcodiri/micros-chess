@@ -1,11 +1,10 @@
-package io.marcodiri.github.webservice.eventhandler;
+package io.github.marcodiri.webservice.eventhandler;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -94,9 +93,7 @@ public class ESEventHandlerIT {
     }
 
     @Test
-    void listenerCallsCreateGameOnGameProposalAcceptedEvents()
-            throws InterruptedException, ExecutionException, IllegalAccessException,
-            InvocationTargetException, NoSuchMethodException {
+    void listenerRequestsCreateGameOnGameProposalAcceptedEvents() throws Exception {
         UUID gameProposalId = UUID.randomUUID();
         UUID player1Id = UUID.randomUUID();
         UUID player2Id = UUID.randomUUID();
@@ -111,8 +108,7 @@ public class ESEventHandlerIT {
                 .appendToStream(streamName, eventData)
                 .get();
 
-        await().atMost(2, SECONDS).untilAsserted(() ->
-        verify(myResource).method(expectedRequest));
+        await().atMost(2, SECONDS).untilAsserted(() -> verify(myResource).method(expectedRequest));
     }
 
 }
