@@ -4,8 +4,6 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import com.eventstore.dbclient.EventStoreDBClient;
 import com.eventstore.dbclient.RecordedEvent;
@@ -15,17 +13,17 @@ import com.eventstore.dbclient.Subscription;
 import com.eventstore.dbclient.SubscriptionListener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.github.marcodiri.gameservice.api.web.CreateGameRequest;
-import io.github.marcodiri.gameservice.api.web.CreateGameResponse;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalEventType;
+import io.github.marcodiri.webservice.web.WebService;
 
 public class ESEventHandler implements AutoCloseable {
 
     private static final Logger LOGGER = LogManager.getLogger(ESEventHandler.class);
 
     private final EventStoreDBClient clientES;
-    private final WebClient clientHttp;
+
+    private WebService webService;
 
     private abstract class GameESListener extends SubscriptionListener {
 
@@ -49,9 +47,9 @@ public class ESEventHandler implements AutoCloseable {
 
     };
 
-    public ESEventHandler(final EventStoreDBClient clientES, final WebClient clientHttp) {
+    public ESEventHandler(final EventStoreDBClient clientES, WebService webService) {
         this.clientES = clientES;
-        this.clientHttp = clientHttp;
+        this.webService = webService;
 
         SubscribeToStreamOptions options = SubscribeToStreamOptions.get()
                 .fromStart()
@@ -71,20 +69,9 @@ public class ESEventHandler implements AutoCloseable {
                                     originalEvent.getEventData(),
                                     GameProposalAccepted.class);
 
-                            CreateGameRequest createGameRequest = new CreateGameRequest(
+                            webService.sendCreateGameRequest(
                                     gameProposalAcceptedEvent.getCreatorId(),
                                     gameProposalAcceptedEvent.getAcceptorId());
-                            LOGGER.info("POSTing to endpoint /game/create-game " + createGameRequest);
-
-                            CreateGameResponse response = clientHttp.post()
-                                    .uri("/game/create-game")
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .accept(MediaType.APPLICATION_JSON)
-                                    .bodyValue(createGameRequest)
-                                    .retrieve()
-                                    .bodyToMono(CreateGameResponse.class)
-                                    .block();
-                            LOGGER.info("Received response " + response);
                         } catch (Exception e) {
                             LOGGER.error(e.getMessage());
                         }
