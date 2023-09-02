@@ -1,7 +1,5 @@
 package io.github.marcodiri.webservice.web;
 
-import java.util.UUID;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.MediaType;
@@ -9,20 +7,26 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import io.github.marcodiri.gameservice.api.web.CreateGameRequest;
 import io.github.marcodiri.gameservice.api.web.CreateGameResponse;
+import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
+import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
 
 public class WebService {
 
+    private final EventController controller;
     private final WebClient httpClient;
 
     private static final Logger LOGGER = LogManager.getLogger(WebService.class);
 
-    public WebService(final WebClient httpClient) {
+    public WebService(final WebClient httpClient, final EventController controller) {
         this.httpClient = httpClient;
+        this.controller = controller;
     }
 
-    public CreateGameResponse sendCreateGameRequest(UUID player1Id, UUID player2Id) {
+    public CreateGameResponse sendCreateGameRequest(GameProposalAccepted event) {
 
-        CreateGameRequest createGameRequest = new CreateGameRequest(player1Id, player2Id);
+        CreateGameRequest createGameRequest = new CreateGameRequest(
+                event.getCreatorId(),
+                event.getAcceptorId());
 
         LOGGER.info("POSTing to endpoint /game/create-game " + createGameRequest);
         CreateGameResponse response = httpClient.post()
@@ -35,6 +39,10 @@ public class WebService {
                 .block();
         LOGGER.info("Received response " + response);
         return response;
+    }
+
+    public void notifyClients(GameProposalCreated event) {
+        controller.notifyGameProposalCreated(event);
     }
 
 }

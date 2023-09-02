@@ -22,6 +22,7 @@ import com.eventstore.dbclient.EventStoreDBClientSettings;
 import com.eventstore.dbclient.EventStoreDBConnectionString;
 
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
+import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
 import io.github.marcodiri.webservice.web.WebService;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,7 +55,7 @@ public class ESEventHandlerIT {
     }
 
     @Test
-    void listenerRequestsCreateGameOnGameProposalAcceptedEvents() throws Exception {
+    void listenerCallsWebServiceOnGameProposalAcceptedEvents() throws Exception {
         UUID gameProposalId = UUID.randomUUID();
         UUID player1Id = UUID.randomUUID();
         UUID player2Id = UUID.randomUUID();
@@ -68,7 +69,24 @@ public class ESEventHandlerIT {
                 .appendToStream(streamName, eventData)
                 .get();
 
-        await().atMost(2, SECONDS).untilAsserted(() -> verify(webService).sendCreateGameRequest(player1Id, player2Id));
+        await().atMost(2, SECONDS).untilAsserted(() -> verify(webService).sendCreateGameRequest(event));
+    }
+
+    @Test
+    void listenerCallsWebServiceOnGameProposalCreatedEvents() throws Exception {
+        UUID gameProposalId = UUID.randomUUID();
+        UUID creatorId = UUID.randomUUID();
+        GameProposalCreated event = new GameProposalCreated(gameProposalId, creatorId);
+        EventData eventData = EventData
+                .builderAsJson(event.getType().toString(), event)
+                .build();
+        String streamName = String.format("Test_%s", gameProposalId);
+
+        writerClient
+                .appendToStream(streamName, eventData)
+                .get();
+
+        await().atMost(2, SECONDS).untilAsserted(() -> verify(webService).notifyClients(event));
     }
 
 }
