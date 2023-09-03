@@ -26,6 +26,7 @@ import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 import io.github.marcodiri.gameservice.api.event.GameCreated;
+import io.github.marcodiri.gameservice.api.event.MovePlayed;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -150,6 +151,60 @@ public class EventControllerTest {
         await()
                 .atMost(2, SECONDS)
                 .untilAsserted(() -> assertThat(blockingQueue2.peek()).isEqualTo(testEvent));
+    }
+
+    @Test
+    void verifyMovePlayedIsReceivedByClients() throws Exception {
+
+        UUID gameId = UUID.randomUUID();
+
+        BlockingQueue<MovePlayed> blockingQueue1 = new ArrayBlockingQueue<>(1);
+        BlockingQueue<MovePlayed> blockingQueue2 = new ArrayBlockingQueue<>(1);
+
+        webSocketStompClient.setMessageConverter(new MappingJackson2MessageConverter());
+
+        StompSession session1 = webSocketStompClient
+                .connectAsync(getWsPath(), new StompSessionHandlerAdapter() {
+                })
+                .get(1, SECONDS);
+        StompSession session2 = webSocketStompClient
+                .connectAsync(getWsPath(), new StompSessionHandlerAdapter() {
+                })
+                .get(1, SECONDS);
+        session1.subscribe("/topic/game/" + gameId, new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return MovePlayed.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                blockingQueue1.add((MovePlayed) payload);
+            }
+        });
+        session2.subscribe("/topic/game/" + gameId, new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return MovePlayed.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                blockingQueue2.add((MovePlayed) payload);
+            }
+        });
+
+        UUID playerId = UUID.randomUUID();
+        String move = "e4";
+        MovePlayed testEvent = new MovePlayed(gameId, playerId, move);
+        controller.notifyMovePlayed(testEvent);
+
+        await()
+                .atMost(10, SECONDS)
+                .untilAsserted(() -> assertThat(blockingQueue1.poll()).isEqualTo(testEvent));
+        await()
+                .atMost(2, SECONDS)
+                .untilAsserted(() -> assertThat(blockingQueue2.poll()).isEqualTo(testEvent));
     }
 
     private String getWsPath() {

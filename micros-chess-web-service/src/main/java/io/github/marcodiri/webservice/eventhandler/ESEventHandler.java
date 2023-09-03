@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.marcodiri.gameservice.api.event.GameCreated;
 import io.github.marcodiri.gameservice.api.event.GameEventType;
+import io.github.marcodiri.gameservice.api.event.MovePlayed;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalEventType;
@@ -113,6 +114,26 @@ public class ESEventHandler implements AutoCloseable {
                                     GameCreated.class);
 
                             webService.notifyClients(gameCreatedEvent);
+                        } catch (Exception e) {
+                            LOGGER.error(e.getMessage());
+                        }
+                    }
+                },
+                options);
+
+        clientES.subscribeToStream(
+                "$et-" + GameEventType.MOVE.toString(),
+                new ESListener() {
+                    @Override
+                    public void onEvent(Subscription subscription, ResolvedEvent event) {
+                        super.onEvent(subscription, event);
+                        try {
+                            RecordedEvent originalEvent = event.getEvent();
+                            MovePlayed movePlayedEvent = new ObjectMapper().readValue(
+                                    originalEvent.getEventData(),
+                                    MovePlayed.class);
+
+                            webService.notifyClients(movePlayedEvent);
                         } catch (Exception e) {
                             LOGGER.error(e.getMessage());
                         }

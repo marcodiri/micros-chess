@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import io.github.marcodiri.gameservice.api.event.GameCreated;
+import io.github.marcodiri.gameservice.api.event.MovePlayed;
 import io.github.marcodiri.gameservice.api.web.CreateGameRequest;
 import io.github.marcodiri.gameservice.api.web.CreateGameResponse;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
@@ -109,6 +110,18 @@ public class WebServiceTest {
         webService.notifyClients(event);
 
         verify(controller).notifyGameCreated(event);
+    }
+
+    @Test
+    void notifyClientsMovePlayed() {
+        UUID gameId = UUID.randomUUID();
+        UUID playerId = UUID.randomUUID();
+        String move = "e4";
+        MovePlayed event = new MovePlayed(gameId, playerId, move);
+
+        webService.notifyClients(event);
+
+        verify(controller).notifyMovePlayed(event);
     }
 
 }
