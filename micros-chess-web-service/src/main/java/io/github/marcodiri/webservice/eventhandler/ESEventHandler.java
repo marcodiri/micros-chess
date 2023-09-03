@@ -13,6 +13,8 @@ import com.eventstore.dbclient.Subscription;
 import com.eventstore.dbclient.SubscriptionListener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.github.marcodiri.gameservice.api.event.GameCreated;
+import io.github.marcodiri.gameservice.api.event.GameEventType;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalEventType;
@@ -26,7 +28,7 @@ public class ESEventHandler implements AutoCloseable {
 
     private WebService webService;
 
-    private abstract class GameESListener extends SubscriptionListener {
+    private abstract class ESListener extends SubscriptionListener {
 
         @Override
         public void onEvent(Subscription subscription, ResolvedEvent event) {
@@ -58,7 +60,7 @@ public class ESEventHandler implements AutoCloseable {
 
         clientES.subscribeToStream(
                 "$et-" + GameProposalEventType.ACCEPTED.toString(),
-                new GameESListener() {
+                new ESListener() {
                     @Override
                     public void onEvent(Subscription subscription, ResolvedEvent event) {
                         super.onEvent(subscription, event);
@@ -80,7 +82,7 @@ public class ESEventHandler implements AutoCloseable {
 
         clientES.subscribeToStream(
                 "$et-" + GameProposalEventType.CREATED.toString(),
-                new GameESListener() {
+                new ESListener() {
                     @Override
                     public void onEvent(Subscription subscription, ResolvedEvent event) {
                         super.onEvent(subscription, event);
@@ -91,6 +93,26 @@ public class ESEventHandler implements AutoCloseable {
                                     GameProposalCreated.class);
 
                             webService.notifyClients(gameProposalCreatedEvent);
+                        } catch (Exception e) {
+                            LOGGER.error(e.getMessage());
+                        }
+                    }
+                },
+                options);
+
+        clientES.subscribeToStream(
+                "$et-" + GameEventType.CREATED.toString(),
+                new ESListener() {
+                    @Override
+                    public void onEvent(Subscription subscription, ResolvedEvent event) {
+                        super.onEvent(subscription, event);
+                        try {
+                            RecordedEvent originalEvent = event.getEvent();
+                            GameCreated gameCreatedEvent = new ObjectMapper().readValue(
+                                    originalEvent.getEventData(),
+                                    GameCreated.class);
+
+                            webService.notifyClients(gameCreatedEvent);
                         } catch (Exception e) {
                             LOGGER.error(e.getMessage());
                         }

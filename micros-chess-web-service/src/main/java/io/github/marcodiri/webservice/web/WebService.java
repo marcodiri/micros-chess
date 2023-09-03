@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import io.github.marcodiri.gameservice.api.event.GameCreated;
 import io.github.marcodiri.gameservice.api.web.CreateGameRequest;
 import io.github.marcodiri.gameservice.api.web.CreateGameResponse;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
@@ -23,7 +24,6 @@ public class WebService {
     }
 
     public CreateGameResponse sendCreateGameRequest(GameProposalAccepted event) {
-
         CreateGameRequest createGameRequest = new CreateGameRequest(
                 event.getCreatorId(),
                 event.getAcceptorId());
@@ -43,6 +43,10 @@ public class WebService {
 
     public void notifyClients(GameProposalCreated event) {
         controller.notifyGameProposalCreated(event);
+    }
+
+    public void notifyClients(GameCreated event) {
+        controller.notifyGameCreated(event);
     }
 
 }

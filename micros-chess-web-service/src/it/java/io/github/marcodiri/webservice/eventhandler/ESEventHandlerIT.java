@@ -21,6 +21,7 @@ import com.eventstore.dbclient.EventStoreDBClient;
 import com.eventstore.dbclient.EventStoreDBClientSettings;
 import com.eventstore.dbclient.EventStoreDBConnectionString;
 
+import io.github.marcodiri.gameservice.api.event.GameCreated;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
 import io.github.marcodiri.webservice.web.WebService;
@@ -81,6 +82,24 @@ public class ESEventHandlerIT {
                 .builderAsJson(event.getType().toString(), event)
                 .build();
         String streamName = String.format("Test_%s", gameProposalId);
+
+        writerClient
+                .appendToStream(streamName, eventData)
+                .get();
+
+        await().atMost(2, SECONDS).untilAsserted(() -> verify(webService).notifyClients(event));
+    }
+
+    @Test
+    void listenerCallsWebServiceOnGameCreatedEvents() throws Exception {
+        UUID gameId = UUID.randomUUID();
+        UUID player1Id = UUID.randomUUID();
+        UUID player2Id = UUID.randomUUID();
+        GameCreated event = new GameCreated(gameId, player1Id, player2Id);
+        EventData eventData = EventData
+                .builderAsJson(event.getType().toString(), event)
+                .build();
+        String streamName = String.format("Test_%s", gameId);
 
         writerClient
                 .appendToStream(streamName, eventData)
