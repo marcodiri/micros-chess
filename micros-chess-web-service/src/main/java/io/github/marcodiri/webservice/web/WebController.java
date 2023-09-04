@@ -1,17 +1,25 @@
 package io.github.marcodiri.webservice.web;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.UUID;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.reactive.function.client.WebClient;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.github.marcodiri.gameservice.api.event.GameCreated;
 import io.github.marcodiri.gameservice.api.event.MovePlayed;
@@ -24,10 +32,11 @@ import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
 @Controller
 public class WebController {
 
-    private WebClient httpClient;
+    private URI gameServiceBaseUri;
 
-    public void setHttpClient(WebClient httpClient) {
-        this.httpClient = httpClient;
+    @Autowired
+    public void setGameServiceBaseUri(URI baseUri) {
+        this.gameServiceBaseUri = baseUri;
     }
 
     @Autowired
@@ -51,41 +60,60 @@ public class WebController {
         this.simpMessagingTemplate.convertAndSend("/topic/game/" + event.getGameId(), event);
     }
 
-    public CreateGameResponse sendCreateGameRequest(GameProposalAccepted event) {
+    public CreateGameResponse sendCreateGameRequest(GameProposalAccepted event)
+            throws ClientProtocolException, IOException {
         CreateGameRequest createGameRequest = new CreateGameRequest(
                 event.getCreatorId(),
                 event.getAcceptorId());
 
+        ObjectMapper mapper = new ObjectMapper();
+
         LOGGER.info("POSTing to endpoint /game/create-game " + createGameRequest);
-        CreateGameResponse response = httpClient.post()
-                .uri("/game/create-game")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(createGameRequest)
-                .retrieve()
-                .bodyToMono(CreateGameResponse.class)
-                .block();
-        LOGGER.info("Received response " + response);
-        return response;
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+
+            HttpPost request = new HttpPost(gameServiceBaseUri.toString() + "/game/create-game");
+            request.setHeader("Content-Type", "application/json");
+            request.setHeader("Accept", "application/json");
+
+            StringEntity entity = new StringEntity(mapper.writeValueAsString(createGameRequest));
+            entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
+
+            request.setEntity(entity);
+
+            CreateGameResponse response = client.execute(request,
+                    httpResponse -> mapper.readValue(httpResponse.getEntity().getContent(), CreateGameResponse.class));
+
+            LOGGER.info("Received response " + response);
+            return response;
+        }
     }
 
     @MessageMapping("/game/{gameId}/{playerId}")
-    public void sendPlayMoveRequest(@DestinationVariable String gameId, @DestinationVariable String playerId, String move)
-            throws IllegalArgumentException {
+    public void sendPlayMoveRequest(@DestinationVariable String gameId, @DestinationVariable String playerId,
+            String move)
+            throws IllegalArgumentException, ClientProtocolException, IOException {
         UUID gameUuid = UUID.fromString(gameId);
         UUID playerUuid = UUID.fromString(playerId);
         PlayMoveRequest playMoveRequest = new PlayMoveRequest(gameUuid, playerUuid, move);
 
+        ObjectMapper mapper = new ObjectMapper();
+
         LOGGER.info("POSTing to endpoint /game/play-move " + playMoveRequest);
-        var response = httpClient.post()
-                .uri("/game/play-move")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(playMoveRequest)
-                .retrieve()
-                .toBodilessEntity()
-                .block();
-        LOGGER.info("Received response " + response);
-        // TODO: send confirmation to client based on response
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+
+            HttpPost request = new HttpPost(gameServiceBaseUri.toString() + "/game/play-move");
+            request.setHeader("Content-Type", "application/json");
+            request.setHeader("Accept", "application/json");
+
+            StringEntity entity = new StringEntity(mapper.writeValueAsString(playMoveRequest));
+            entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
+
+            request.setEntity(entity);
+
+            HttpResponse response = client.execute(request);
+
+            LOGGER.info("Received response " + response);
+        }
     }
 
 }

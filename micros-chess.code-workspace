@@ -16,11 +16,19 @@
         "debug": false
       },
       {
+        "command": "clean verify",
+        "debug": false
+      },
+      {
         "command": "docker:start",
         "debug": false
       },
       {
         "command": "docker:stop",
+        "debug": false
+      },
+      {
+        "command": "docker:build docker:start",
         "debug": false
       },
       {

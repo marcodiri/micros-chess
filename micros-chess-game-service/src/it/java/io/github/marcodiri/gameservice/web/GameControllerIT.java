@@ -13,15 +13,17 @@ import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import com.eventstore.dbclient.EventStoreDBClient;
+import com.eventstore.dbclient.EventStoreDBClientSettings;
+import com.eventstore.dbclient.EventStoreDBConnectionString;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 
 import io.github.marcodiri.core.domain.event.DomainEvent;
 import io.github.marcodiri.gameservice.api.event.GameCreated;
+import io.github.marcodiri.gameservice.api.event.MovePlayed;
 import io.github.marcodiri.gameservice.api.web.CreateGameResponse;
-import io.github.marcodiri.gameservice.api.web.PlayMoveRequest;
 import io.github.marcodiri.gameservice.domain.GameFactory;
-import io.github.marcodiri.gameservice.repository.eventstore.EventStoreDBClientFactory;
 import io.github.marcodiri.gameservice.repository.eventstore.GameESRepository;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -33,11 +35,14 @@ public class GameControllerIT {
     private final UUID testPlayer2Id = UUID.fromString("12345678-830e-4cc9-860b-f0228735544e");
     private final String move = "e4";
 
+    private static final String CONNECTION_STRING = "esdb://localhost:2113?tls=false";
+    private static final EventStoreDBClientSettings setts = EventStoreDBConnectionString
+            .parseOrThrow(CONNECTION_STRING);
     private static GameESRepository repository;
 
     @BeforeAll
     static void setupRepository() {
-        repository = new GameESRepository(new EventStoreDBClientFactory().createClient(),
+        repository = new GameESRepository(EventStoreDBClient.create(setts),
                 new GameFactory());
     }
 
@@ -89,7 +94,7 @@ public class GameControllerIT {
 
         cancelPost.then().assertThat().statusCode(equalTo(200));
         List<DomainEvent> writtenEvents = repository.readEventsForAggregate(gameId);
-        assertThat(writtenEvents.get(1)).isEqualTo(new PlayMoveRequest(gameId, testPlayer1Id, move));
+        assertThat(writtenEvents.get(1)).isEqualTo(new MovePlayed(gameId, testPlayer1Id, move));
     }
 
 }

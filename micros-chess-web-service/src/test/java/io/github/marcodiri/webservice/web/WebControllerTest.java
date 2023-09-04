@@ -25,7 +25,6 @@ import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 import org.springframework.web.socket.sockjs.client.SockJsClient;
@@ -47,7 +46,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class EventControllerTest {
+public class WebControllerTest {
 
     @LocalServerPort
     private Integer port;
@@ -65,7 +64,6 @@ public class EventControllerTest {
 
     @Test
     void verifyGameProposalsCreatedIsReceivedByClients() throws Exception {
-
         BlockingQueue<GameProposalCreated> blockingQueue1 = new ArrayBlockingQueue<>(1);
         BlockingQueue<GameProposalCreated> blockingQueue2 = new ArrayBlockingQueue<>(1);
 
@@ -107,12 +105,8 @@ public class EventControllerTest {
         GameProposalCreated testEvent = new GameProposalCreated(gameProposalId, creatorId);
         controller.notifyClients(testEvent);
 
-        await()
-                .atMost(10, SECONDS)
-                .untilAsserted(() -> assertThat(blockingQueue1.poll()).isEqualTo(testEvent));
-        await()
-                .atMost(2, SECONDS)
-                .untilAsserted(() -> assertThat(blockingQueue2.poll()).isEqualTo(testEvent));
+        assertThat(blockingQueue1.poll(5, SECONDS)).isEqualTo(testEvent);
+        assertThat(blockingQueue2.poll(5, SECONDS)).isEqualTo(testEvent);
     }
 
     @Test
@@ -161,12 +155,8 @@ public class EventControllerTest {
         GameCreated testEvent = new GameCreated(gameId, player1Id, player2Id);
         controller.notifyClients(testEvent);
 
-        await()
-                .atMost(2, SECONDS)
-                .untilAsserted(() -> assertThat(blockingQueue1.peek()).isEqualTo(testEvent));
-        await()
-                .atMost(2, SECONDS)
-                .untilAsserted(() -> assertThat(blockingQueue2.peek()).isEqualTo(testEvent));
+        assertThat(blockingQueue1.poll(5, SECONDS)).isEqualTo(testEvent);
+        assertThat(blockingQueue2.poll(5, SECONDS)).isEqualTo(testEvent);
     }
 
     @Test
@@ -215,19 +205,15 @@ public class EventControllerTest {
         MovePlayed testEvent = new MovePlayed(gameId, playerId, move);
         controller.notifyClients(testEvent);
 
-        await()
-                .atMost(10, SECONDS)
-                .untilAsserted(() -> assertThat(blockingQueue1.poll()).isEqualTo(testEvent));
-        await()
-                .atMost(2, SECONDS)
-                .untilAsserted(() -> assertThat(blockingQueue2.poll()).isEqualTo(testEvent));
+        assertThat(blockingQueue1.poll(10, SECONDS)).isEqualTo(testEvent);
+        assertThat(blockingQueue2.poll(10, SECONDS)).isEqualTo(testEvent);
     }
 
     @Nested
     class RESTRequests {
 
         private static InMemoryRestServer server;
-        private static WebClient httpClient;
+        // private static WebClient httpClient;
 
         private static UUID gameId = UUID.randomUUID();
 
@@ -250,10 +236,8 @@ public class EventControllerTest {
             @Consumes(MediaType.APPLICATION_JSON)
             @Produces(MediaType.APPLICATION_JSON)
             public Response playMove(PlayMoveRequest request) {
-                CreateGameResponse response = new CreateGameResponse(gameId);
                 return Response
                         .ok()
-                        .entity(response)
                         .build();
             }
         }
@@ -264,8 +248,8 @@ public class EventControllerTest {
         @BeforeEach
         void setup() throws IOException {
             server = InMemoryRestServer.create(myResource);
-            httpClient = WebClient.create(server.target().getUri().toString());
-            controller.setHttpClient(httpClient);
+            // httpClient = WebClient.create(server.target().getUri().toString());
+            controller.setGameServiceBaseUri(server.target().getUri());
         }
 
         @AfterEach
@@ -274,7 +258,7 @@ public class EventControllerTest {
         }
 
         @Test
-        void sendCreateGameRequest() {
+        void sendCreateGameRequest() throws Exception {
             UUID player1Id = UUID.randomUUID();
             UUID player2Id = UUID.randomUUID();
             GameProposalAccepted event = new GameProposalAccepted(UUID.randomUUID(), player1Id, player2Id);
@@ -282,7 +266,7 @@ public class EventControllerTest {
 
             CreateGameResponse response = controller.sendCreateGameRequest(event);
 
-            await().atMost(2, SECONDS).untilAsserted(() -> verify(myResource).createGame(expectedRequest));
+            await().atMost(5, SECONDS).untilAsserted(() -> verify(myResource).createGame(expectedRequest));
             assertThat(response).isInstanceOf(CreateGameResponse.class);
         }
 
@@ -302,7 +286,7 @@ public class EventControllerTest {
             session.send("/app/game/" + gameId + "/" + playerId, "e4");
             // controller.sendPlayMoveRequest(gameId.toString(), playerId.toString(), move);
 
-            await().atMost(2, SECONDS).untilAsserted(() -> verify(myResource).playMove(expectedRequest));
+            await().atMost(5, SECONDS).untilAsserted(() -> verify(myResource).playMove(expectedRequest));
         }
 
     }

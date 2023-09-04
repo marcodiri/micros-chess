@@ -4,6 +4,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.eventstore.dbclient.EventStoreDBClient;
 import com.eventstore.dbclient.RecordedEvent;
@@ -21,6 +23,7 @@ import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalEventType;
 import io.github.marcodiri.webservice.web.WebController;
 
+@Component
 public class ESEventHandler implements AutoCloseable {
 
     private static final Logger LOGGER = LogManager.getLogger(ESEventHandler.class);
@@ -51,6 +54,7 @@ public class ESEventHandler implements AutoCloseable {
 
     };
 
+    @Autowired
     public ESEventHandler(final EventStoreDBClient clientES, WebController controller) {
         this.clientES = clientES;
         this.controller = controller;

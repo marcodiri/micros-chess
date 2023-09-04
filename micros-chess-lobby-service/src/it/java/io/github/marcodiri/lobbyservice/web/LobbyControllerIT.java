@@ -13,6 +13,9 @@ import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import com.eventstore.dbclient.EventStoreDBClient;
+import com.eventstore.dbclient.EventStoreDBClientSettings;
+import com.eventstore.dbclient.EventStoreDBConnectionString;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 
@@ -21,7 +24,6 @@ import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCanceled;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
 import io.github.marcodiri.lobbyservice.domain.GameProposalFactory;
-import io.github.marcodiri.lobbyservice.repository.eventstore.EventStoreDBClientFactory;
 import io.github.marcodiri.lobbyservice.repository.eventstore.GameProposalESRepository;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -31,11 +33,14 @@ public class LobbyControllerIT {
 
     private final UUID testPlayerId = UUID.fromString("73531011-830e-4cc9-860b-f0228735544e");
 
+    private static final String CONNECTION_STRING = "esdb://localhost:2113?tls=false";
+    private static final EventStoreDBClientSettings setts = EventStoreDBConnectionString
+            .parseOrThrow(CONNECTION_STRING);
     private static GameProposalESRepository repository;
 
     @BeforeAll
     static void setupRepository() {
-        repository = new GameProposalESRepository(new EventStoreDBClientFactory().createClient(),
+        repository = new GameProposalESRepository(EventStoreDBClient.create(setts),
                 new GameProposalFactory());
     }
 
