@@ -25,13 +25,13 @@ import io.github.marcodiri.gameservice.api.event.GameCreated;
 import io.github.marcodiri.gameservice.api.event.MovePlayed;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
-import io.github.marcodiri.webservice.web.WebService;
+import io.github.marcodiri.webservice.web.WebController;
 
 @ExtendWith(MockitoExtension.class)
 public class ESEventHandlerIT {
 
     @Mock
-    WebService webService;
+    WebController webController;
 
     ESEventHandler eventHandler;
 
@@ -53,7 +53,7 @@ public class ESEventHandlerIT {
 
     @BeforeEach
     void setup() throws IOException {
-        eventHandler = new ESEventHandler(readerClient, webService);
+        eventHandler = new ESEventHandler(readerClient, webController);
     }
 
     @Test
@@ -71,7 +71,7 @@ public class ESEventHandlerIT {
                 .appendToStream(streamName, eventData)
                 .get();
 
-        await().atMost(2, SECONDS).untilAsserted(() -> verify(webService).sendCreateGameRequest(event));
+        await().atMost(2, SECONDS).untilAsserted(() -> verify(webController).sendCreateGameRequest(event));
     }
 
     @Test
@@ -88,7 +88,7 @@ public class ESEventHandlerIT {
                 .appendToStream(streamName, eventData)
                 .get();
 
-        await().atMost(2, SECONDS).untilAsserted(() -> verify(webService).notifyClients(event));
+        await().atMost(2, SECONDS).untilAsserted(() -> verify(webController).notifyClients(event));
     }
 
     @Test
@@ -106,7 +106,7 @@ public class ESEventHandlerIT {
                 .appendToStream(streamName, eventData)
                 .get();
 
-        await().atMost(2, SECONDS).untilAsserted(() -> verify(webService).notifyClients(event));
+        await().atMost(2, SECONDS).untilAsserted(() -> verify(webController).notifyClients(event));
     }
 
     @Test
@@ -124,7 +124,7 @@ public class ESEventHandlerIT {
                 .appendToStream(streamName, eventData)
                 .get();
 
-        await().atMost(2, SECONDS).untilAsserted(() -> verify(webService).notifyClients(event));
+        await().atMost(2, SECONDS).untilAsserted(() -> verify(webController).notifyClients(event));
     }
 
 }

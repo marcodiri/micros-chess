@@ -19,7 +19,7 @@ import io.github.marcodiri.gameservice.api.event.MovePlayed;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalEventType;
-import io.github.marcodiri.webservice.web.WebService;
+import io.github.marcodiri.webservice.web.WebController;
 
 public class ESEventHandler implements AutoCloseable {
 
@@ -27,7 +27,7 @@ public class ESEventHandler implements AutoCloseable {
 
     private final EventStoreDBClient clientES;
 
-    private WebService webService;
+    private WebController controller;
 
     private abstract class ESListener extends SubscriptionListener {
 
@@ -51,9 +51,9 @@ public class ESEventHandler implements AutoCloseable {
 
     };
 
-    public ESEventHandler(final EventStoreDBClient clientES, WebService webService) {
+    public ESEventHandler(final EventStoreDBClient clientES, WebController controller) {
         this.clientES = clientES;
-        this.webService = webService;
+        this.controller = controller;
 
         SubscribeToStreamOptions options = SubscribeToStreamOptions.get()
                 .fromStart()
@@ -73,7 +73,7 @@ public class ESEventHandler implements AutoCloseable {
                                     originalEvent.getEventData(),
                                     GameProposalAccepted.class);
 
-                            webService.sendCreateGameRequest(gameProposalAcceptedEvent);
+                            controller.sendCreateGameRequest(gameProposalAcceptedEvent);
                         } catch (Exception e) {
                             LOGGER.error(e.getMessage());
                         }
@@ -93,7 +93,7 @@ public class ESEventHandler implements AutoCloseable {
                                     originalEvent.getEventData(),
                                     GameProposalCreated.class);
 
-                            webService.notifyClients(gameProposalCreatedEvent);
+                            controller.notifyClients(gameProposalCreatedEvent);
                         } catch (Exception e) {
                             LOGGER.error(e.getMessage());
                         }
@@ -113,7 +113,7 @@ public class ESEventHandler implements AutoCloseable {
                                     originalEvent.getEventData(),
                                     GameCreated.class);
 
-                            webService.notifyClients(gameCreatedEvent);
+                            controller.notifyClients(gameCreatedEvent);
                         } catch (Exception e) {
                             LOGGER.error(e.getMessage());
                         }
@@ -133,7 +133,7 @@ public class ESEventHandler implements AutoCloseable {
                                     originalEvent.getEventData(),
                                     MovePlayed.class);
 
-                            webService.notifyClients(movePlayedEvent);
+                            controller.notifyClients(movePlayedEvent);
                         } catch (Exception e) {
                             LOGGER.error(e.getMessage());
                         }
