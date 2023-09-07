@@ -14,8 +14,7 @@ public class AppConfig {
 
     @Bean
     public URI gameServiceBaseUri() {
-        // TODO
-        return URI.create("");
+        return URI.create("http://game-service:8080/micros-chess/rest");
     }
 
     // This is set to the name of the event store docker container
