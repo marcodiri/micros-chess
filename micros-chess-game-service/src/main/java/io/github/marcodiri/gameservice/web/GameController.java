@@ -66,7 +66,7 @@ public class GameController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response playMove(PlayMoveRequest request) {
-        LOGGER.info("Received CancelGameProposalRequest: {}", request);
+        LOGGER.info("Received PlayMoveRequest: {}", request);
 
         try {
             gameService.playMove(request.getGameId(), request.getPlayerId(), request.getMove());

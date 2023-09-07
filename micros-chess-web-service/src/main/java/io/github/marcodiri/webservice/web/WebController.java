@@ -46,17 +46,20 @@ public class WebController {
 
     public void notifyClients(GameProposalCreated event) {
         // FIXME: should not send back creatorId
+        LOGGER.info("Sending websocket message: " + event);
         this.simpMessagingTemplate.convertAndSend("/topic/game-proposals", event);
     }
 
     public void notifyClients(GameCreated event) {
         // FIXME: should not send back players Id
+        LOGGER.info("Sending websocket message: " + event);
         this.simpMessagingTemplate.convertAndSend("/topic/player/" + event.getPlayer1Id(), event);
         this.simpMessagingTemplate.convertAndSend("/topic/player/" + event.getPlayer2Id(), event);
     }
 
     public void notifyClients(MovePlayed event) {
         // FIXME: should not send back players Id
+        LOGGER.info("Sending websocket message: " + event);
         this.simpMessagingTemplate.convertAndSend("/topic/game/" + event.getGameId(), event);
     }
 
@@ -68,10 +71,11 @@ public class WebController {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        LOGGER.info("POSTing to endpoint /game/create-game " + createGameRequest);
+        String uri = gameServiceBaseUri.toString() + "/game/create-game";
+        LOGGER.info("POSTing to endpoint {} {}", uri, createGameRequest);
         try (CloseableHttpClient client = HttpClients.createDefault()) {
 
-            HttpPost request = new HttpPost(gameServiceBaseUri.toString() + "/game/create-game");
+            HttpPost request = new HttpPost(uri);
             request.setHeader("Content-Type", "application/json");
             request.setHeader("Accept", "application/json");
 
@@ -98,10 +102,11 @@ public class WebController {
 
         ObjectMapper mapper = new ObjectMapper();
 
-        LOGGER.info("POSTing to endpoint /game/play-move " + playMoveRequest);
+        String uri = gameServiceBaseUri.toString() + "/game/play-move";
+        LOGGER.info("POSTing to endpoint {} {}", uri, playMoveRequest);
         try (CloseableHttpClient client = HttpClients.createDefault()) {
 
-            HttpPost request = new HttpPost(gameServiceBaseUri.toString() + "/game/play-move");
+            HttpPost request = new HttpPost(uri);
             request.setHeader("Content-Type", "application/json");
             request.setHeader("Accept", "application/json");
 
