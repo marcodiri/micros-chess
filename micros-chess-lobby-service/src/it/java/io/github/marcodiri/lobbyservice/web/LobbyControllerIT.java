@@ -23,6 +23,7 @@ import io.github.marcodiri.core.domain.event.DomainEvent;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCanceled;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
+import io.github.marcodiri.lobbyservice.api.web.CreateGameProposalResponse;
 import io.github.marcodiri.lobbyservice.domain.GameProposalFactory;
 import io.github.marcodiri.lobbyservice.repository.eventstore.GameProposalESRepository;
 import io.restassured.http.ContentType;

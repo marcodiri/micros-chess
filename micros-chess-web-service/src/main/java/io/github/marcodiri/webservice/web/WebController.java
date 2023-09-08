@@ -28,15 +28,24 @@ import io.github.marcodiri.gameservice.api.web.CreateGameResponse;
 import io.github.marcodiri.gameservice.api.web.PlayMoveRequest;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
+import io.github.marcodiri.lobbyservice.api.web.AcceptGameProposalRequest;
+import io.github.marcodiri.lobbyservice.api.web.CreateGameProposalRequest;
+import io.github.marcodiri.lobbyservice.api.web.CreateGameProposalResponse;
 
 @Controller
 public class WebController {
 
+    private URI lobbyServiceBaseUri;
     private URI gameServiceBaseUri;
 
     @Autowired
-    public void setGameServiceBaseUri(URI baseUri) {
-        this.gameServiceBaseUri = baseUri;
+    public void setLobbyServiceBaseUri(URI lobbyServiceBaseUri) {
+        this.lobbyServiceBaseUri = lobbyServiceBaseUri;
+    }
+
+    @Autowired
+    public void setGameServiceBaseUri(URI gameServiceBaseUri) {
+        this.gameServiceBaseUri = gameServiceBaseUri;
     }
 
     @Autowired
@@ -61,6 +70,66 @@ public class WebController {
         // FIXME: should not send back players Id
         LOGGER.info("Sending websocket message: " + event);
         this.simpMessagingTemplate.convertAndSend("/topic/game/" + event.getGameId(), event);
+    }
+
+    @MessageMapping("/create-game-proposal")
+    public CreateGameProposalResponse sendCreateGameProposalRequest(String playerId)
+            throws ClientProtocolException, IOException {
+        UUID playerUuid = UUID.fromString(playerId);
+        CreateGameProposalRequest createGameProposalRequest = new CreateGameProposalRequest(playerUuid);
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        String uri = lobbyServiceBaseUri.toString() + "/lobby/create-game-proposal";
+        LOGGER.info("POSTing to endpoint {} {}", uri, createGameProposalRequest);
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+
+            HttpPost request = new HttpPost(uri);
+            request.setHeader("Content-Type", "application/json");
+            request.setHeader("Accept", "application/json");
+
+            StringEntity entity = new StringEntity(mapper.writeValueAsString(createGameProposalRequest));
+            entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
+
+            request.setEntity(entity);
+
+            CreateGameProposalResponse response = client.execute(request,
+                    httpResponse -> mapper.readValue(httpResponse.getEntity().getContent(),
+                            CreateGameProposalResponse.class));
+
+            LOGGER.info("Received response " + response);
+            return response;
+        }
+    }
+
+    @MessageMapping("/accept-game-proposal/{gameProposalId}")
+    public void sendCreateGameProposalRequest(
+            @DestinationVariable String gameProposalId,
+            String playerId) throws IOException {
+        UUID gameProposalUuid = UUID.fromString(gameProposalId);
+        UUID playerUuid = UUID.fromString(playerId);
+        AcceptGameProposalRequest acceptGameProposalRequest = new AcceptGameProposalRequest(gameProposalUuid,
+                playerUuid);
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        String uri = lobbyServiceBaseUri.toString() + "/lobby/accept-game-proposal";
+        LOGGER.info("POSTing to endpoint {} {}", uri, acceptGameProposalRequest);
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+
+            HttpPost request = new HttpPost(uri);
+            request.setHeader("Content-Type", "application/json");
+            request.setHeader("Accept", "application/json");
+
+            StringEntity entity = new StringEntity(mapper.writeValueAsString(acceptGameProposalRequest));
+            entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
+
+            request.setEntity(entity);
+
+            HttpResponse response = client.execute(request);
+
+            LOGGER.info("Received response " + response);
+        }
     }
 
     public CreateGameResponse sendCreateGameRequest(GameProposalAccepted event)

@@ -37,6 +37,9 @@ import io.github.marcodiri.gameservice.api.web.CreateGameResponse;
 import io.github.marcodiri.gameservice.api.web.PlayMoveRequest;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
+import io.github.marcodiri.lobbyservice.api.web.AcceptGameProposalRequest;
+import io.github.marcodiri.lobbyservice.api.web.CreateGameProposalRequest;
+import io.github.marcodiri.lobbyservice.api.web.CreateGameProposalResponse;
 import io.github.marcodiri.rest.InMemoryRestServer;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -215,10 +218,36 @@ public class WebControllerTest {
         private static InMemoryRestServer server;
         // private static WebClient httpClient;
 
+        private static UUID gameProposalId = UUID.randomUUID();
         private static UUID gameId = UUID.randomUUID();
 
+        @Path("/lobby")
+        public static class MyResourceLobby {
+            @POST
+            @Path("/create-game-proposal")
+            @Consumes(MediaType.APPLICATION_JSON)
+            @Produces(MediaType.APPLICATION_JSON)
+            public Response createGameProposal(CreateGameProposalRequest request) {
+                CreateGameProposalResponse response = new CreateGameProposalResponse(gameProposalId);
+                return Response
+                        .ok()
+                        .entity(response)
+                        .build();
+            }
+
+            @POST
+            @Path("/accept-game-proposal")
+            @Consumes(MediaType.APPLICATION_JSON)
+            @Produces(MediaType.APPLICATION_JSON)
+            public Response acceptGameProposal(AcceptGameProposalRequest request) {
+                return Response
+                        .ok()
+                        .build();
+            }
+        }
+
         @Path("/game")
-        public static class MyResource {
+        public static class MyResourceGame {
             @POST
             @Path("/create-game")
             @Consumes(MediaType.APPLICATION_JSON)
@@ -243,18 +272,53 @@ public class WebControllerTest {
         }
 
         @Spy
-        MyResource myResource = new MyResource();
+        MyResourceLobby myResourceLobby = new MyResourceLobby();
+        @Spy
+        MyResourceGame myResourceGame = new MyResourceGame();
 
         @BeforeEach
         void setup() throws IOException {
-            server = InMemoryRestServer.create(myResource);
+            server = InMemoryRestServer.create(myResourceLobby, myResourceGame);
             // httpClient = WebClient.create(server.target().getUri().toString());
+            controller.setLobbyServiceBaseUri(server.target().getUri());
             controller.setGameServiceBaseUri(server.target().getUri());
         }
 
         @AfterEach
         void closeServer() {
             server.close();
+        }
+
+        @Test
+        void sendCreateGameProposalRequest() throws Exception {
+            UUID playerId = UUID.randomUUID();
+            CreateGameProposalRequest expectedRequest = new CreateGameProposalRequest(playerId);
+
+            webSocketStompClient.setMessageConverter(new MappingJackson2MessageConverter());
+            StompSession session = webSocketStompClient
+                    .connectAsync(getWsPath(), new StompSessionHandlerAdapter() {
+                    })
+                    .get(1, SECONDS);
+
+            session.send("/app/create-game-proposal", playerId);
+
+            await().atMost(5, SECONDS).untilAsserted(() -> verify(myResourceLobby).createGameProposal(expectedRequest));
+        }
+
+        @Test
+        void sendAcceptGameProposalRequest() throws Exception {
+            UUID playerId = UUID.randomUUID();
+            AcceptGameProposalRequest expectedRequest = new AcceptGameProposalRequest(gameProposalId, playerId);
+
+            webSocketStompClient.setMessageConverter(new MappingJackson2MessageConverter());
+            StompSession session = webSocketStompClient
+                    .connectAsync(getWsPath(), new StompSessionHandlerAdapter() {
+                    })
+                    .get(1, SECONDS);
+
+            session.send("/app/accept-game-proposal/" + gameProposalId, playerId);
+
+            await().atMost(5, SECONDS).untilAsserted(() -> verify(myResourceLobby).acceptGameProposal(expectedRequest));
         }
 
         @Test
@@ -266,7 +330,7 @@ public class WebControllerTest {
 
             CreateGameResponse response = controller.sendCreateGameRequest(event);
 
-            await().atMost(5, SECONDS).untilAsserted(() -> verify(myResource).createGame(expectedRequest));
+            await().atMost(5, SECONDS).untilAsserted(() -> verify(myResourceGame).createGame(expectedRequest));
             assertThat(response).isInstanceOf(CreateGameResponse.class);
         }
 
@@ -286,7 +350,7 @@ public class WebControllerTest {
             session.send("/app/game/" + gameId + "/" + playerId, "e4");
             // controller.sendPlayMoveRequest(gameId.toString(), playerId.toString(), move);
 
-            await().atMost(5, SECONDS).untilAsserted(() -> verify(myResource).playMove(expectedRequest));
+            await().atMost(5, SECONDS).untilAsserted(() -> verify(myResourceGame).playMove(expectedRequest));
         }
 
     }

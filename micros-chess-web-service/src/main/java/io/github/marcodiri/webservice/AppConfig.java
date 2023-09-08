@@ -13,6 +13,11 @@ import com.eventstore.dbclient.EventStoreDBConnectionString;
 public class AppConfig {
 
     @Bean
+    public URI lobbyServiceBaseUri() {
+        return URI.create("http://lobby-service:8080/micros-chess/rest");
+    }
+
+    @Bean
     public URI gameServiceBaseUri() {
         return URI.create("http://game-service:8080/micros-chess/rest");
     }

@@ -3,6 +3,10 @@ package io.github.marcodiri.lobbyservice.web;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import io.github.marcodiri.lobbyservice.api.web.AcceptGameProposalRequest;
+import io.github.marcodiri.lobbyservice.api.web.CancelGameProposalRequest;
+import io.github.marcodiri.lobbyservice.api.web.CreateGameProposalRequest;
+import io.github.marcodiri.lobbyservice.api.web.CreateGameProposalResponse;
 import io.github.marcodiri.lobbyservice.domain.GameProposalAggregate;
 import io.github.marcodiri.lobbyservice.domain.LobbyService;
 import io.github.marcodiri.lobbyservice.domain.UnsupportedStateTransitionException;
