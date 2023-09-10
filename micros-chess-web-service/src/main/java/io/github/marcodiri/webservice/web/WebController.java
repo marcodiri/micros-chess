@@ -103,7 +103,7 @@ public class WebController {
     }
 
     @MessageMapping("/accept-game-proposal/{gameProposalId}")
-    public void sendCreateGameProposalRequest(
+    public void sendAcceptGameProposalRequest(
             @DestinationVariable String gameProposalId,
             String playerId) throws IOException {
         UUID gameProposalUuid = UUID.fromString(gameProposalId);
