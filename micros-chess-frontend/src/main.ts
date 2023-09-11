@@ -23,7 +23,7 @@ const setColorScheme = (e: MediaQueryList | MediaQueryListEvent) => {
 setColorScheme(colorSchemeQueryList)
 colorSchemeQueryList.addEventListener('change', setColorScheme)
 
-client.connect();
+client.connect()
 
 const app = createApp(App)
 

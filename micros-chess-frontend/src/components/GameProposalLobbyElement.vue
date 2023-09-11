@@ -1,13 +1,7 @@
-<script setup lang="ts">
-defineProps({
-  n: Number
-})
-</script>
-
 <template>
   <tr>
-    <th scope="row">{{ n }}</th>
-    <td>Mark</td>
-    <td>@mdo</td>
+    <th scope="row"><slot name="num"></slot></th>
+    <td><slot name="id"></slot></td>
+    <td><slot name="state"></slot></td>
   </tr>
 </template>
