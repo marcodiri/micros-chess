@@ -3,7 +3,8 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import App from './App.vue'
-import router from './router'
+import router from '@/router'
+import { client } from '@/utils/StompClient'
 
 const colorSchemeQueryList = window.matchMedia('(prefers-color-scheme: dark)')
 
@@ -21,6 +22,8 @@ const setColorScheme = (e: MediaQueryList | MediaQueryListEvent) => {
 
 setColorScheme(colorSchemeQueryList)
 colorSchemeQueryList.addEventListener('change', setColorScheme)
+
+client.connect();
 
 const app = createApp(App)
 
