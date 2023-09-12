@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, type Component, type Ref } from 'vue'
+import { type Component, type Ref, shallowRef } from 'vue'
 import TheLobby from '@/components/TheLobby.vue'
 import TheGame from '@/components/TheGame.vue'
 
-let displayedComponent: Ref<Component> = ref(TheLobby)
+let displayedComponent: Ref<Component> = shallowRef(TheLobby)
 
 function switchComponent(event: any) {
   displayedComponent.value = TheGame
@@ -14,6 +14,7 @@ function switchComponent(event: any) {
   <main>
     <div class="container p-0">
       <component :is="displayedComponent" @game-proposal-accepted="switchComponent"></component>
+      <TheGame />
     </div>
   </main>
 </template>
