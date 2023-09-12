@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, type Component, type Ref } from 'vue';
+import { ref, type Component, type Ref } from 'vue'
 import TheLobby from '@/components/TheLobby.vue'
 import TheGame from '@/components/TheGame.vue'
 

@@ -20,11 +20,11 @@ class MicrosChessClient {
       brokerURL: uri,
       onConnect: (frame) => {
         this.setConnected(true)
-        console.log('Connected: ' + frame)
+        console.log(frame)
       },
       onDisconnect: (frame) => {
         this.setConnected(false)
-        console.log('Disconnected: ' + frame)
+        console.log(frame)
       },
       onWebSocketError: (error) => {
         console.error('Error with websocket', error)

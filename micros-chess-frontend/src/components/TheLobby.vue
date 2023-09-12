@@ -29,7 +29,7 @@ function acceptGameProposal(gameProposal: any) {
   <button
     type="button"
     class="btn btn-primary"
-    :class="{ disabled: !client.isConnected }"
+    :class="{ disabled: !client.isConnected.value }"
     @click="createGameProposal"
   >
     Create game
