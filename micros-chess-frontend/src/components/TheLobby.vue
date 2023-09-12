@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import GameProposalLobbyElement from '@/components/GameProposalLobbyElement.vue'
-import { client } from '@/utils/StompClient'
+import { client } from '@/utils/stompClient'
 import { ref } from 'vue'
 
 const gameProposals = ref(client.gameProposals)
