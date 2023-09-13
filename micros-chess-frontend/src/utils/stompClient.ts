@@ -74,13 +74,10 @@ class MicrosChessClient {
     if (!this.subscribedToPlayerChannel) {
       this.stompClient.subscribe(`/topic/player/${this.playerUUID}`, (message) => {
         const event = JSON.parse(message.body)
-        this.currentGameUUID = event.gameId
         if (event.type == 'CREATED') {
+          this.currentGameUUID = event.gameId
+          this.subscribeGameChannel(event.gameId)
           this.gameAcceptedCallbacks.forEach((callback) => {
-            callback(event)
-          })
-        } else if (event.type == 'MOVE') {
-          this.movePlayedCallbacks.forEach((callback) => {
             callback(event)
           })
         }
@@ -88,6 +85,18 @@ class MicrosChessClient {
       this.subscribedToPlayerChannel = true
       console.log('Subscribed to player channel')
     }
+  }
+
+  private subscribeGameChannel(gameId: string) {
+    this.stompClient.subscribe(`/topic/game/${gameId}`, (message) => {
+      const event = JSON.parse(message.body)
+      if (event.type == 'MOVE') {
+        this.movePlayedCallbacks.forEach((callback) => {
+          callback(event)
+        })
+      }
+    })
+    console.log('Subscribed to game channel')
   }
 
   public connect() {
@@ -102,7 +111,7 @@ class MicrosChessClient {
     this.subscribePlayerChannel()
     this.stompClient.publish({
       destination: '/app/create-game-proposal',
-      body: `${this.playerUUID}`
+      body: this.playerUUID
     })
     console.log(`Creating game proposal`)
   }
@@ -110,15 +119,19 @@ class MicrosChessClient {
   public sendAcceptGameProposalRequest(gameProposalId: string) {
     this.subscribePlayerChannel()
     this.stompClient.publish({
-      destination: '/app/accept-game-proposal/' + gameProposalId,
-      body: `${this.playerUUID}`
+      destination: `/app/accept-game-proposal/${gameProposalId}`,
+      body: this.playerUUID
     })
     console.log(`Accepting ${gameProposalId}`)
   }
 
-  public sendMove(move: string) {
+  public sendMove(move: { from: string; to: string }) {
     if (this.currentGameUUID) {
-      console.log(`Playing move ${move}`)
+      this.stompClient.publish({
+        destination: `/app/game/${this.currentGameUUID}/${this.playerUUID}`,
+        body: JSON.stringify(move)
+      })
+      console.log(`Playing move ${move.from} to ${move.to}`)
     }
   }
 }
