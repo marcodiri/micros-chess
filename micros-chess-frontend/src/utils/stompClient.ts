@@ -8,7 +8,6 @@ class MicrosChessClient {
   private _connected = ref(false)
   private subscribedToPlayerChannel: boolean = false
   public readonly gameProposals: Ref<any[]> = ref([])
-  private currentGameUUID?: string
   private gameAcceptedCallbacks = new Map<(event: any) => void, (event: any) => void>()
   private movePlayedCallbacks = new Map<(event: any) => void, (event: any) => void>()
 
@@ -75,7 +74,6 @@ class MicrosChessClient {
       this.stompClient.subscribe(`/topic/player/${this.playerUUID}`, (message) => {
         const event = JSON.parse(message.body)
         if (event.type == 'CREATED') {
-          this.currentGameUUID = event.gameId
           this.subscribeGameChannel(event.gameId)
           this.gameAcceptedCallbacks.forEach((callback) => {
             callback(event)
@@ -125,14 +123,12 @@ class MicrosChessClient {
     console.log(`Accepting ${gameProposalId}`)
   }
 
-  public sendMove(move: { from: string; to: string }) {
-    if (this.currentGameUUID) {
+  public sendMove(gameId: string, move: { from: string; to: string }) {
       this.stompClient.publish({
-        destination: `/app/game/${this.currentGameUUID}/${this.playerUUID}`,
+        destination: `/app/game/${gameId}/${this.playerUUID}`,
         body: JSON.stringify(move)
       })
       console.log(`Playing move ${move.from} to ${move.to}`)
-    }
   }
 }
 

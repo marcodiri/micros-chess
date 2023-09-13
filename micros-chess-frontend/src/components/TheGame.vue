@@ -7,14 +7,13 @@ import { client } from '@/utils/stompClient'
 import '~chessboardjs/chessboard2.min.css'
 import '~chessboardjs/chessboard2.min.js'
 
-client.registerMovePlayedCallback((event) => {
-  console.log('From TheGame')
-
-  console.log(event)
+const props = defineProps({
+  gameId: String,
+  playerColor: String
 })
 
 function playMove(move: Move) {
-  client.sendMove(move)
+  client.sendMove(props.gameId!, move)
 }
 
 onMounted(() => {
@@ -34,8 +33,31 @@ onMounted(() => {
 
   updateStatus()
 
+  client.registerMovePlayedCallback((event) => {
+    if (event.playerId !== client.playerUUID) {
+      console.log(`Received move ${event.move.from} to ${event.move.to}`)
+      try {
+        const move = game.move({
+          from: event.move.from,
+          to: event.move.to,
+          promotion: 'q' // NOTE: always promote to a queen for simplicity
+        })
+
+        if (move) {
+          board.fen(game.fen(), () => {
+            updateStatus()
+          })
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    }
+  })
+
   function onDragStart(dragStartEvt: { piece: any; square: any }) {
     if (game.isGameOver()) return false
+
+    if (game.turn() !== props.playerColor) return false
 
     if (game.turn() === 'w' && !isWhitePiece(dragStartEvt.piece)) return false
     if (game.turn() === 'b' && !isBlackPiece(dragStartEvt.piece)) return false

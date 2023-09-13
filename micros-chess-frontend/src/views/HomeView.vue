@@ -6,8 +6,13 @@ import { client } from '@/utils/stompClient'
 
 let displayedComponent: Ref<Component> = shallowRef(TheLobby)
 
+let currentGameId: string
+let currentColor: string
+
 client.registerGameAcceptedCallback((event) => {
   console.log(event)
+  currentGameId = event.gameId
+  currentColor = event.player1Id == client.playerUUID ? 'w' : 'b'
   displayedComponent.value = TheGame
 })
 </script>
@@ -15,8 +20,11 @@ client.registerGameAcceptedCallback((event) => {
 <template>
   <main>
     <div class="container p-0">
-      <component :is="displayedComponent"></component>
-      <TheGame />
+      <component
+        :is="displayedComponent"
+        :game-id="currentGameId"
+        :player-color="currentColor"
+      ></component>
     </div>
   </main>
 </template>
