@@ -23,6 +23,7 @@ import io.github.marcodiri.core.domain.event.DomainEvent;
 import io.github.marcodiri.gameservice.api.event.GameCreated;
 import io.github.marcodiri.gameservice.api.event.MovePlayed;
 import io.github.marcodiri.gameservice.api.web.CreateGameResponse;
+import io.github.marcodiri.gameservice.api.web.Move;
 import io.github.marcodiri.gameservice.domain.GameFactory;
 import io.github.marcodiri.gameservice.repository.eventstore.GameESRepository;
 import io.restassured.http.ContentType;
@@ -33,7 +34,6 @@ public class GameControllerIT {
 
     private final UUID testPlayer1Id = UUID.fromString("73531011-830e-4cc9-860b-f0228735544e");
     private final UUID testPlayer2Id = UUID.fromString("12345678-830e-4cc9-860b-f0228735544e");
-    private final String move = "e4";
 
     private static final String CONNECTION_STRING = "esdb://localhost:2113?tls=false";
     private static final EventStoreDBClientSettings setts = EventStoreDBConnectionString
@@ -77,6 +77,9 @@ public class GameControllerIT {
             throws StreamReadException, DatabindException, InterruptedException,
             ExecutionException,
             IOException {
+        String moveString = "{\"from\":\"e2\", \"to\":\"e4\"}";
+        Move move = new Move("e2", "e4");
+
         RequestSpecification createRequest = with()
                 .contentType(ContentType.JSON)
                 .body("{ \"player1Id\" : \"" + testPlayer1Id + "\", \"player2Id\" : \"" + testPlayer2Id + "\" }");
@@ -88,7 +91,7 @@ public class GameControllerIT {
         RequestSpecification playMoveRequest = with()
                 .contentType(ContentType.JSON)
                 .body("{ \"gameId\" : \"" + gameId + "\", \"playerId\" : \"" + testPlayer1Id
-                        + "\", \"move\" : \"" + move + "\" }");
+                        + "\", \"move\" : " + moveString + " }");
 
         Response cancelPost = playMoveRequest.post("micros-chess/rest/game/play-move");
 

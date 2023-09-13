@@ -31,6 +31,7 @@ import io.github.marcodiri.core.domain.Aggregate;
 import io.github.marcodiri.core.domain.event.DomainEvent;
 import io.github.marcodiri.gameservice.api.event.GameCreated;
 import io.github.marcodiri.gameservice.api.event.MovePlayed;
+import io.github.marcodiri.gameservice.api.web.Move;
 import io.github.marcodiri.gameservice.domain.GameAggregate;
 import io.github.marcodiri.gameservice.domain.GameFactory;
 import io.github.marcodiri.gameservice.domain.GameNotInProgressException;
@@ -98,9 +99,10 @@ public class GameESRepositoryTest {
         void saveCallsProcessAndApplyAndWriteEvents() throws IllegalAccessException, IllegalArgumentException,
                 InvocationTargetException, NoSuchMethodException, SecurityException, InterruptedException,
                 ExecutionException {
+            Move move = new Move("e2", "e4");
             List<DomainEvent> events = Arrays.asList(
                     new GameCreated(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()),
-                    new MovePlayed(UUID.randomUUID(), UUID.randomUUID(), ""));
+                    new MovePlayed(UUID.randomUUID(), UUID.randomUUID(), move));
             when(game.process(isA(CreateGameCommand.class))).thenReturn(events);
 
             gameESRepository.save(cmd);
@@ -125,12 +127,13 @@ public class GameESRepositoryTest {
 
         private UUID gameId;
         private PlayMoveCommand cmd;
+        private Move move = new Move("e2", "e4");
 
         @BeforeEach
         void setup() {
             gameId = UUID.randomUUID();
             when(gameFactory.createAggregate()).thenReturn(game);
-            cmd = new PlayMoveCommand(UUID.randomUUID(), "e4");
+            cmd = new PlayMoveCommand(UUID.randomUUID(), move);
         }
 
         @Test
@@ -139,7 +142,7 @@ public class GameESRepositoryTest {
                 IllegalMoveException {
             List<DomainEvent> events = Arrays.asList(
                     new GameCreated(gameId, UUID.randomUUID(), UUID.randomUUID()),
-                    new MovePlayed(gameId, UUID.randomUUID(), "e4"));
+                    new MovePlayed(gameId, UUID.randomUUID(), move));
             doReturn(events).when(gameESRepository).readEventsForAggregate(gameId);
 
             gameESRepository.update(gameId, cmd);
@@ -156,7 +159,7 @@ public class GameESRepositoryTest {
                 NoSuchMethodException, InterruptedException, ExecutionException, IOException {
             List<DomainEvent> newEvents = Arrays.asList(
                     new GameCreated(gameId, UUID.randomUUID(), UUID.randomUUID()),
-                    new MovePlayed(gameId, UUID.randomUUID(), "e4"));
+                    new MovePlayed(gameId, UUID.randomUUID(), move));
             when(game.process(isA(PlayMoveCommand.class))).thenReturn(newEvents);
 
             gameESRepository.update(gameId, cmd);

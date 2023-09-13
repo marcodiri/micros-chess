@@ -3,13 +3,15 @@ package io.github.marcodiri.gameservice.domain.command;
 import java.util.Objects;
 import java.util.UUID;
 
+import io.github.marcodiri.gameservice.api.web.Move;
+
 public class PlayMoveCommand extends GameCommand {
 
     private final UUID playerId;
-    private final String move;
+    private final Move move;
 
 
-    public PlayMoveCommand(final UUID playerId, final String move) {
+    public PlayMoveCommand(final UUID playerId, final Move move) {
         this.playerId = playerId;
         this.move = move;
     }
@@ -18,7 +20,7 @@ public class PlayMoveCommand extends GameCommand {
         return playerId;
     }
 
-    public String getMove() {
+    public Move getMove() {
         return move;
     }
 

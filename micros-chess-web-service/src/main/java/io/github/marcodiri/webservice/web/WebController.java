@@ -25,6 +25,7 @@ import io.github.marcodiri.gameservice.api.event.GameCreated;
 import io.github.marcodiri.gameservice.api.event.MovePlayed;
 import io.github.marcodiri.gameservice.api.web.CreateGameRequest;
 import io.github.marcodiri.gameservice.api.web.CreateGameResponse;
+import io.github.marcodiri.gameservice.api.web.Move;
 import io.github.marcodiri.gameservice.api.web.PlayMoveRequest;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
@@ -163,7 +164,7 @@ public class WebController {
 
     @MessageMapping("/game/{gameId}/{playerId}")
     public void sendPlayMoveRequest(@DestinationVariable String gameId, @DestinationVariable String playerId,
-            String move)
+            Move move)
             throws IllegalArgumentException, ClientProtocolException, IOException {
         UUID gameUuid = UUID.fromString(gameId);
         UUID playerUuid = UUID.fromString(playerId);

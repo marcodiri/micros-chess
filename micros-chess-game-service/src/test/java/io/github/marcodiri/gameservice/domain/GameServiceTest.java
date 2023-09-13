@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 
+import io.github.marcodiri.gameservice.api.web.Move;
 import io.github.marcodiri.gameservice.domain.command.CreateGameCommand;
 import io.github.marcodiri.gameservice.domain.command.PlayMoveCommand;
 import io.github.marcodiri.gameservice.repository.eventstore.GameESRepository;
@@ -66,13 +67,14 @@ public class GameServiceTest {
     @Nested
     class PlayMove {
 
+        private Move move = new Move("e2", "e4");
+
         @Test
         void playMoveCallsRepositoryUpdateWithCommand() throws StreamReadException, DatabindException,
                 IllegalAccessException, InvocationTargetException, NoSuchMethodException, InterruptedException,
                 ExecutionException, IOException, GameNotInProgressException, IllegalMoveException {
             UUID gameId = UUID.randomUUID();
             UUID playerId = UUID.randomUUID();
-            String move = "e4";
             PlayMoveCommand expectedCommand = new PlayMoveCommand(playerId, move);
 
             gameService.playMove(gameId, playerId, move);
@@ -87,7 +89,7 @@ public class GameServiceTest {
             GameAggregate game = new GameAggregate();
             when(gameESRepository.update(isA(UUID.class), isA(PlayMoveCommand.class))).thenReturn(game);
 
-            GameAggregate returnedGame = gameService.playMove(UUID.randomUUID(), UUID.randomUUID(), "");
+            GameAggregate returnedGame = gameService.playMove(UUID.randomUUID(), UUID.randomUUID(), move);
 
             assertThat(returnedGame).isEqualTo(game);
         }

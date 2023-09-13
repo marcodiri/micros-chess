@@ -9,12 +9,15 @@ public class PlayMoveRequest {
 
     private UUID gameId;
     private UUID playerId;
-    private String move;
+    private Move move;
 
     public PlayMoveRequest() {
     }
 
-    public PlayMoveRequest(final UUID gameId, final UUID playerId, final String move) {
+    public PlayMoveRequest(
+            final UUID gameId,
+            final UUID playerId,
+            final Move move) {
         this.gameId = gameId;
         this.playerId = playerId;
         this.move = move;
@@ -36,11 +39,11 @@ public class PlayMoveRequest {
         this.playerId = playerId;
     }
 
-    public String getMove() {
+    public Move getMove() {
         return move;
     }
 
-    public void setMove(final String move) {
+    public void setMove(final Move move) {
         this.move = move;
     }
 

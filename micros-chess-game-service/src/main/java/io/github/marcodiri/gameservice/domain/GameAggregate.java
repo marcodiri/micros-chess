@@ -11,6 +11,7 @@ import io.github.marcodiri.core.domain.Aggregate;
 import io.github.marcodiri.core.domain.event.DomainEvent;
 import io.github.marcodiri.gameservice.api.event.GameCreated;
 import io.github.marcodiri.gameservice.api.event.MovePlayed;
+import io.github.marcodiri.gameservice.api.web.Move;
 import io.github.marcodiri.gameservice.domain.command.CreateGameCommand;
 import io.github.marcodiri.gameservice.domain.command.PlayMoveCommand;
 
@@ -18,7 +19,7 @@ public class GameAggregate extends Aggregate {
 
     private UUID player1Id;
     private UUID player2Id;
-    private List<ImmutablePair<UUID, String>> movesList;
+    private List<ImmutablePair<UUID, Move>> movesList;
     private GameState state;
 
     public GameAggregate() {
@@ -36,7 +37,7 @@ public class GameAggregate extends Aggregate {
         return state;
     }
 
-    List<ImmutablePair<UUID, String>> getMovesList() {
+    List<ImmutablePair<UUID, Move>> getMovesList() {
         return movesList;
     }
 

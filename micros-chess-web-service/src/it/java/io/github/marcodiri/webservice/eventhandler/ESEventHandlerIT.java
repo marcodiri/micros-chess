@@ -23,6 +23,7 @@ import com.eventstore.dbclient.EventStoreDBConnectionString;
 
 import io.github.marcodiri.gameservice.api.event.GameCreated;
 import io.github.marcodiri.gameservice.api.event.MovePlayed;
+import io.github.marcodiri.gameservice.api.web.Move;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
 import io.github.marcodiri.webservice.web.WebController;
@@ -113,7 +114,7 @@ public class ESEventHandlerIT {
     void listenerCallsWebServiceOnMovePlayedEvents() throws Exception {
         UUID gameId = UUID.randomUUID();
         UUID playerId = UUID.randomUUID();
-        String move = "e4";
+        Move move = new Move("e2", "e4");
         MovePlayed event = new MovePlayed(gameId, playerId, move);
         EventData eventData = EventData
                 .builderAsJson(event.getType().toString(), event)

@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import io.github.marcodiri.core.domain.event.DomainEvent;
 import io.github.marcodiri.gameservice.api.event.GameCreated;
 import io.github.marcodiri.gameservice.api.event.MovePlayed;
+import io.github.marcodiri.gameservice.api.web.Move;
 import io.github.marcodiri.gameservice.domain.command.CreateGameCommand;
 import io.github.marcodiri.gameservice.domain.command.PlayMoveCommand;
 
@@ -63,7 +64,7 @@ public class GameAggregateTest {
 
         private UUID gameId, playerId;
         private PlayMoveCommand cmd;
-        private String move = "e4";
+        private Move move = new Move("e2", "e4");
 
         @BeforeEach
         void createCommand() {
@@ -138,8 +139,8 @@ public class GameAggregateTest {
     class applyMovePlayed {
 
         private UUID gameId, player1Id, player2Id;
-        private String move1 = "e4";
-        private String move2 = "e5";
+        private Move move1 = new Move("e2", "e4");
+        private Move move2 = new Move("e7", "e5");
         private MovePlayed event1, event2;
 
         @BeforeEach

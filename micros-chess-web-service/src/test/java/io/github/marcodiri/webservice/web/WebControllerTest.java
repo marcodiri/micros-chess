@@ -34,6 +34,7 @@ import io.github.marcodiri.gameservice.api.event.GameCreated;
 import io.github.marcodiri.gameservice.api.event.MovePlayed;
 import io.github.marcodiri.gameservice.api.web.CreateGameRequest;
 import io.github.marcodiri.gameservice.api.web.CreateGameResponse;
+import io.github.marcodiri.gameservice.api.web.Move;
 import io.github.marcodiri.gameservice.api.web.PlayMoveRequest;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalAccepted;
 import io.github.marcodiri.lobbyservice.api.event.GameProposalCreated;
@@ -204,7 +205,7 @@ public class WebControllerTest {
         });
 
         UUID playerId = UUID.randomUUID();
-        String move = "e4";
+        Move move = new Move("e2", "e4");
         MovePlayed testEvent = new MovePlayed(gameId, playerId, move);
         controller.notifyClients(testEvent);
 
@@ -338,7 +339,7 @@ public class WebControllerTest {
         void verifyPlayMoveEndpoint() throws Exception {
             UUID gameId = UUID.randomUUID();
             UUID playerId = UUID.randomUUID();
-            String move = "e4";
+            Move move = new Move("e2", "e4");
             PlayMoveRequest expectedRequest = new PlayMoveRequest(gameId, playerId, move);
 
             webSocketStompClient.setMessageConverter(new MappingJackson2MessageConverter());
@@ -347,7 +348,7 @@ public class WebControllerTest {
                     })
                     .get(1, SECONDS);
 
-            session.send("/app/game/" + gameId + "/" + playerId, "e4");
+            session.send("/app/game/" + gameId + "/" + playerId, move);
             // controller.sendPlayMoveRequest(gameId.toString(), playerId.toString(), move);
 
             await().atMost(5, SECONDS).untilAsserted(() -> verify(myResourceGame).playMove(expectedRequest));

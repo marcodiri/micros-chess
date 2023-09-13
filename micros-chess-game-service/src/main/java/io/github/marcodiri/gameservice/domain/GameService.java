@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 
+import io.github.marcodiri.gameservice.api.web.Move;
 import io.github.marcodiri.gameservice.domain.command.CreateGameCommand;
 import io.github.marcodiri.gameservice.domain.command.PlayMoveCommand;
 import io.github.marcodiri.gameservice.repository.eventstore.GameESRepository;
@@ -34,7 +35,7 @@ public class GameService {
         return game;
     }
 
-    public GameAggregate playMove(UUID gameId, UUID playerId, String move) throws StreamReadException,
+    public GameAggregate playMove(UUID gameId, UUID playerId, Move move) throws StreamReadException,
             DatabindException, IllegalAccessException, InvocationTargetException, NoSuchMethodException,
             InterruptedException, ExecutionException, IOException, GameNotInProgressException, IllegalMoveException {
         GameAggregate game = gameESRepository.update(gameId, new PlayMoveCommand(playerId, move));
