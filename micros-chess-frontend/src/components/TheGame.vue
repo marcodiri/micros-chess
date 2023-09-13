@@ -1,9 +1,21 @@
 <script setup lang="ts">
 // import '@/assets/chessboard.js'
 import { onMounted } from 'vue'
-import { Chess } from 'chess.js'
-import '~chessboardjs/chessboard2.min.css?url'
-import '~chessboardjs/chessboard2.min.js?url'
+import { Chess, type Move } from 'chess.js'
+import { client } from '@/utils/stompClient'
+
+import '~chessboardjs/chessboard2.min.css'
+import '~chessboardjs/chessboard2.min.js'
+
+client.registerMovePlayedCallback((event) => {
+  console.log('From TheGame')
+
+  console.log(event)
+})
+
+function playMove(move: Move) {
+  client.sendMove(move)
+}
 
 onMounted(() => {
   const game = new Chess()
@@ -13,7 +25,6 @@ onMounted(() => {
     position: game.fen(),
     onDragStart,
     onDrop
-    // onSnapEnd
   }
   const board = (window as any)['Chessboard2']('myBoard', boardConfig)
 
@@ -24,23 +35,10 @@ onMounted(() => {
   updateStatus()
 
   function onDragStart(dragStartEvt: { piece: any; square: any }) {
-    // do not pick up pieces if the game is over
     if (game.isGameOver()) return false
 
-    // only pick up pieces for the side to move
     if (game.turn() === 'w' && !isWhitePiece(dragStartEvt.piece)) return false
     if (game.turn() === 'b' && !isBlackPiece(dragStartEvt.piece)) return false
-
-    // what moves are available to from this square?
-    const legalMoves = game.moves({
-      square: dragStartEvt.square,
-      verbose: true
-    })
-
-    // place Circles on the possible target squares
-    legalMoves.forEach((move) => {
-      board.addCircle(move.to)
-    })
   }
 
   function isWhitePiece(piece: string) {
@@ -56,30 +54,20 @@ onMounted(() => {
       const move = game.move({
         from: dropEvt.source,
         to: dropEvt.target,
-        promotion: 'q' // NOTE: always promote to a queen for example simplicity
+        promotion: 'q' // NOTE: always promote to a queen for simplicity
       })
 
       if (move) {
-        // update the board position with the new game position, then update status DOM elements
         board.fen(game.fen(), () => {
           updateStatus()
+          playMove(move)
         })
       }
     } catch (error) {
       return 'snapback'
     }
-
-    // remove all Circles from the board
-    board.clearCircles()
   }
 
-  // update the board position after the piece snap
-  // for castling, en passant, pawn promotion
-  // function onSnapEnd () {
-  //   board.position(game.fen())
-  // }
-
-  // update DOM elements with the current game status
   function updateStatus() {
     let statusHTML = ''
     const whosTurn = game.turn() === 'w' ? 'White' : 'Black'
