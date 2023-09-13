@@ -3,7 +3,7 @@
 {
   "name": "Docker in Docker + Java17",
 
-  "build": { "dockerfile": "Dockerfile" },
+  "image": "mcr.microsoft.com/devcontainers/base:bullseye",
 
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
@@ -24,15 +24,8 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "redhat.vscode-server-connector",
         "vscjava.vscode-java-pack",
-        "streetsidesoftware.code-spell-checker",
-        "codezombiech.gitignore",
-        "eamodio.gitlens",
-        "oderwat.indent-rainbow",
         "esbenp.prettier-vscode",
-        "Gruntfuggly.todo-tree",
-        "shardulm94.trailing-spaces",
         "redhat.vscode-xml"
       ]
     }
