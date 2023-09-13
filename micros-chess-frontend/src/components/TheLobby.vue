@@ -3,23 +3,15 @@ import GameProposalLobbyElement from '@/components/GameProposalLobbyElement.vue'
 import { client } from '@/utils/stompClient'
 import { readonly } from 'vue'
 
-const emit = defineEmits(['game-proposal-accepted'])
-
 const gameProposals = readonly(client.gameProposals)
 
 function createGameProposal() {
-  client.sendCreateGameProposalRequest((event) => {
-    console.log(event)
-    emit('game-proposal-accepted', event)
-  })
+  client.sendCreateGameProposalRequest()
 }
 
 function acceptGameProposal(gameProposal: any) {
   if (gameProposal.creatorId !== client.playerUUID) {
-    client.sendAcceptGameProposalRequest(gameProposal.gameProposalId, (event) => {
-      console.log(event)
-      emit('game-proposal-accepted', event)
-    })
+    client.sendAcceptGameProposalRequest(gameProposal.gameProposalId)
   }
 }
 </script>

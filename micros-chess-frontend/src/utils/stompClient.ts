@@ -9,9 +9,27 @@ class MicrosChessClient {
   private subscribedToPlayerChannel: boolean = false
   public readonly gameProposals: Ref<any[]> = ref([])
   private currentGameUUID?: string
+  private gameAcceptedCallbacks = new Map<(event: any) => void, (event: any) => void>()
+  private movePlayedCallbacks = new Map<(event: any) => void, (event: any) => void>()
 
   public get isConnected() {
     return this._connected
+  }
+
+  public registerGameAcceptedCallback(callback: (event: any) => void) {
+    this.gameAcceptedCallbacks.set(callback, callback)
+  }
+
+  public removeGameAcceptedCallback(callback: (event: any) => void) {
+    return this.gameAcceptedCallbacks.delete(callback)
+  }
+
+  public registerMovePlayedCallback(callback: (event: any) => void) {
+    this.movePlayedCallbacks.set(callback, callback)
+  }
+
+  public removeMovePlayedCallback(callback: (event: any) => void) {
+    return this.movePlayedCallbacks.delete(callback)
   }
 
   constructor(public uri: string) {
@@ -52,13 +70,19 @@ class MicrosChessClient {
     console.log('Subscribed to game-proposals channel')
   }
 
-  private subscribePlayerChannel(callback: (event: any) => void) {
+  private subscribePlayerChannel() {
     if (!this.subscribedToPlayerChannel) {
       this.stompClient.subscribe(`/topic/player/${this.playerUUID}`, (message) => {
         const event = JSON.parse(message.body)
         this.currentGameUUID = event.gameId
         if (event.type == 'CREATED') {
-          callback(event)
+          this.gameAcceptedCallbacks.forEach((callback) => {
+            callback(event)
+          })
+        } else if (event.type == 'MOVE') {
+          this.movePlayedCallbacks.forEach((callback) => {
+            callback(event)
+          })
         }
       })
       this.subscribedToPlayerChannel = true
@@ -74,8 +98,8 @@ class MicrosChessClient {
     this.stompClient.deactivate()
   }
 
-  public sendCreateGameProposalRequest(gameAcceptedCallback: (event: any) => void) {
-    this.subscribePlayerChannel(gameAcceptedCallback)
+  public sendCreateGameProposalRequest() {
+    this.subscribePlayerChannel()
     this.stompClient.publish({
       destination: '/app/create-game-proposal',
       body: `${this.playerUUID}`
@@ -83,11 +107,8 @@ class MicrosChessClient {
     console.log(`Creating game proposal`)
   }
 
-  public sendAcceptGameProposalRequest(
-    gameProposalId: string,
-    gameAcceptedCallback: (event: any) => void
-  ) {
-    this.subscribePlayerChannel(gameAcceptedCallback)
+  public sendAcceptGameProposalRequest(gameProposalId: string) {
+    this.subscribePlayerChannel()
     this.stompClient.publish({
       destination: '/app/accept-game-proposal/' + gameProposalId,
       body: `${this.playerUUID}`
