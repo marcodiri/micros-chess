@@ -6,6 +6,8 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.github.marcodiri.gameservice.api.web.Move;
+
 public class MovePlayed extends GameEvent {
 
     private static final long serialVersionUID = 1L;
@@ -13,13 +15,13 @@ public class MovePlayed extends GameEvent {
     private final GameEventType type = GameEventType.MOVE;
 
     private final UUID playerId;
-    private final String move;
+    private final Move move;
 
     @JsonCreator
     public MovePlayed(
             @JsonProperty("gameId") final UUID gameId,
             @JsonProperty("playerId") final UUID playerId,
-            @JsonProperty("move") final String move) {
+            @JsonProperty("move") final Move move) {
         super(gameId);
         this.playerId = playerId;
         this.move = move;
@@ -34,7 +36,7 @@ public class MovePlayed extends GameEvent {
         return playerId;
     }
 
-    public String getMove() {
+    public Move getMove() {
         return move;
     }
 

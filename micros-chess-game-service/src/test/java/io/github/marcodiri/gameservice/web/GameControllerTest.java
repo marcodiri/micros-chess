@@ -6,7 +6,6 @@ import static io.restassured.RestAssured.with;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import io.github.marcodiri.gameservice.api.web.Move;
 import io.github.marcodiri.gameservice.domain.GameAggregate;
 import io.github.marcodiri.gameservice.domain.GameNotInProgressException;
 import io.github.marcodiri.gameservice.domain.GameService;
@@ -113,7 +113,8 @@ public class GameControllerTest {
     @Nested
     class PlayMove {
 
-        private final String move = "e4";
+        private String moveString = "{\"from\":\"e2\", \"to\":\"e4\"}";
+        private Move move = new Move("e2", "e4");
 
         @Test
         void OKResponse() throws Exception {
@@ -122,7 +123,7 @@ public class GameControllerTest {
             given()
                     .contentType(ContentType.JSON)
                     .body("{ \"gameId\" : \"" + gameId + "\", \"playerId\" : \"" + testPlayer1Id
-                            + "\", \"move\" : \"" + move + "\" }")
+                            + "\", \"move\" : " + moveString + " }")
                     .when()
                     .post(server.target("/game/play-move").getUri())
                     .then()
@@ -135,13 +136,13 @@ public class GameControllerTest {
         @Test
         void badRequestOnGameNotInProgressException() throws Exception {
             UUID gameId = UUID.randomUUID();
-            when(gameService.playMove(any(UUID.class), any(UUID.class), anyString()))
+            when(gameService.playMove(any(UUID.class), any(UUID.class), any(Move.class)))
                     .thenThrow(new GameNotInProgressException(GameState.ENDED));
 
             given()
                     .contentType(ContentType.JSON)
                     .body("{ \"gameId\" : \"" + gameId + "\", \"playerId\" : \"" + testPlayer1Id
-                            + "\", \"move\" : \"" + move + "\" }")
+                            + "\", \"move\" : " + moveString + " }")
                     .when()
                     .post(server.target("/game/play-move").getUri())
                     .then()
@@ -152,13 +153,13 @@ public class GameControllerTest {
         @Test
         void badRequestOnIllegalMoveException() throws Exception {
             UUID gameId = UUID.randomUUID();
-            when(gameService.playMove(any(UUID.class), any(UUID.class), anyString()))
+            when(gameService.playMove(any(UUID.class), any(UUID.class), any(Move.class)))
                     .thenThrow(new IllegalMoveException(move));
 
             given()
                     .contentType(ContentType.JSON)
                     .body("{ \"gameId\" : \"" + gameId + "\", \"playerId\" : \"" + testPlayer1Id
-                            + "\", \"move\" : \"" + move + "\" }")
+                            + "\", \"move\" : " + moveString + " }")
                     .when()
                     .post(server.target("/game/play-move").getUri())
                     .then()
@@ -169,13 +170,13 @@ public class GameControllerTest {
         @Test
         void internalErrorOnException() throws Exception {
             UUID gameId = UUID.randomUUID();
-            when(gameService.playMove(any(UUID.class), any(UUID.class), anyString()))
+            when(gameService.playMove(any(UUID.class), any(UUID.class), any(Move.class)))
                     .thenThrow(new IllegalArgumentException());
 
             given()
                     .contentType(ContentType.JSON)
                     .body("{ \"gameId\" : \"" + gameId + "\", \"playerId\" : \"" + testPlayer1Id
-                            + "\", \"move\" : \"" + move + "\" }")
+                            + "\", \"move\" : " + moveString + " }")
                     .when()
                     .post(server.target("/game/play-move").getUri())
                     .then()
