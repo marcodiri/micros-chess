@@ -21,6 +21,7 @@ onMounted(() => {
 
   const boardConfig = {
     draggable: true,
+    orientation: props.playerColor === 'w' ? 'white' : 'black',
     position: game.fen(),
     onDragStart,
     onDrop
@@ -126,12 +127,25 @@ onMounted(() => {
 
 <template>
   <h4>Game</h4>
-  <div id="myBoard" style="width: 400px"></div>
-
-  <label>Status:</label>
-  <div id="gameStatus"></div>
-  <label>FEN:</label>
-  <div id="gameFEN"></div>
-  <label>PGN:</label>
-  <div id="gamePGN"></div>
+  <div class="p-1 border rounded">
+    <div class="row">
+      <div class="col-lg">
+        <div id="myBoard" class="mx-auto mx-lg-0" style="width: 100%"></div>
+      </div>
+      <div class="col-lg">
+        <label>Status:</label>
+        <div id="gameStatus"></div>
+        <label>FEN:</label>
+        <div id="gameFEN"></div>
+        <label>PGN:</label>
+        <div id="gamePGN"></div>
+      </div>
+    </div>
+  </div>
 </template>
+
+<style scoped>
+#myBoard {
+  max-width: 500px;
+}
+</style>

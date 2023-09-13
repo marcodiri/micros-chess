@@ -124,11 +124,11 @@ class MicrosChessClient {
   }
 
   public sendMove(gameId: string, move: { from: string; to: string }) {
-      this.stompClient.publish({
-        destination: `/app/game/${gameId}/${this.playerUUID}`,
-        body: JSON.stringify(move)
-      })
-      console.log(`Playing move ${move.from} to ${move.to}`)
+    this.stompClient.publish({
+      destination: `/app/game/${gameId}/${this.playerUUID}`,
+      body: JSON.stringify(move)
+    })
+    console.log(`Playing move ${move.from} to ${move.to}`)
   }
 }
 
