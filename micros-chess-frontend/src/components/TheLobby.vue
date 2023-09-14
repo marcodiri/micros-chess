@@ -17,15 +17,36 @@ function acceptGameProposal(gameProposal: any) {
 </script>
 
 <template>
-  <h4>Lobby</h4>
-  <button
-    type="button"
-    class="btn btn-primary"
-    :class="{ disabled: !client.isConnected.value }"
-    @click="createGameProposal"
-  >
-    Create game
-  </button>
+  <div class="row justify-content-between">
+    <div class="col">
+      <div class="row justify-content-between">
+        <div class="col-auto">
+          <h4>Lobby</h4>
+        </div>
+        <div class="col">
+          <div v-if="!client.isConnected.value" class="d-inline align-middle text-danger">
+            <b>Connecting</b>
+            <div class="spinner-border spinner-border-sm mx-1" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          <div v-else class="text-success">
+            <b>Connected</b>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col text-end">
+      <button
+        type="button"
+        class="btn btn-primary"
+        :class="{ disabled: !client.isConnected.value }"
+        @click="createGameProposal"
+      >
+        Create game
+      </button>
+    </div>
+  </div>
   <div class="table-wrapper border rounded">
     <table class="table table-striped table-hover">
       <thead>
